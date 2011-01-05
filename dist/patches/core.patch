@@ -1,0 +1,148 @@
+Index: core/Tracker/Action.php
+===================================================================
+--- core/Tracker/Action.php	(revision 3237)
++++ core/Tracker/Action.php	(working copy)
+@@ -242,7 +242,7 @@
+ 			$this->idActionUrl = Piwik_Tracker::getDatabase()->lastInsertId();
+ 		}
+ 	}
+-	
++
+ 	/**
+ 	 * @param int $idSite
+ 	 */
+@@ -250,6 +250,11 @@
+ 	{
+ 		$this->idSite = $idSite;
+ 	}
++
++	public function getIdSite()
++	{
++		return $this->idSite;
++	}
+ 	
+ 	
+ 	/**
+@@ -291,7 +296,7 @@
+ 		*/ 
+ 		Piwik_PostEvent('Tracker.Action.record', $this, $info);
+ 	 }
+-	 
++
+ 	/**
+ 	 * Returns the ID of the newly created record in the log_link_visit_action table
+ 	 *
+@@ -301,7 +306,7 @@
+ 	{
+ 		return $this->idLinkVisitAction;
+ 	}
+-	
++
+ 	 /**
+ 	 * Generates the name of the action from the URL or the specified name.
+ 	 * Sets the name as $this->actionName
+Index: core/ViewDataTable.php
+===================================================================
+--- core/ViewDataTable.php	(revision 3237)
++++ core/ViewDataTable.php	(working copy)
+@@ -137,6 +137,14 @@
+ 	protected $columnsToDisplay = array();
+ 
+ 	/**
++	 * Array of columns set to display in table
++	 *
++	 * @var array
++	 */
++	protected $tableAllColumnsToDisplay = array();
++
++
++	/**
+ 	 * Variable that is used as the DIV ID in the rendered HTML
+ 	 *
+ 	 * @var string
+@@ -359,7 +367,7 @@
+ 	{		
+ 		// we build the request string (URL) to call the API
+ 		$requestString = $this->getRequestString();
+-		
++
+ 		// we make the request to the API
+ 		$request = new Piwik_API_Request($requestString);
+ 		
+@@ -893,6 +901,19 @@
+ 	}
+ 
+ 	/**
++	 * Overrides the columns that will be displayed in the HTML output all columns view
++	 * By default they are defined in Piwik_ViewDataTable_HtmlTable_AllColumns class
++	 */
++	public function setTableAllColumnsToDisplay( $columnsNames )
++	{
++		if(!is_array($columnsNames))
++		{
++			$columnsNames = array($columnsNames);
++		}
++		$this->tableAllColumnsToDisplay = $columnsNames;
++	}
++
++	/**
+ 	 * Returns columns names to display, in order.
+ 	 * If no columns were specified to be displayed, return all columns found in the first row.
+ 	 * @param array PHP array conversion of the data table
+Index: core/ViewDataTable/HtmlTable/AllColumns.php
+===================================================================
+--- core/ViewDataTable/HtmlTable/AllColumns.php	(revision 3237)
++++ core/ViewDataTable/HtmlTable/AllColumns.php	(working copy)
+@@ -42,13 +42,23 @@
+ 		{
+ 			$columnUniqueVisitors = 'nb_uniq_visitors';
+ 		}
+-		$this->setColumnsToDisplay(array('label', 
+-										'nb_visits', 
+-										$columnUniqueVisitors, 
+-										'nb_actions_per_visit', 
+-										'avg_time_on_site', 
++
++		if( count($this->tableAllColumnsToDisplay) )
++		{
++			$columnsToDisplay = $this->tableAllColumnsToDisplay;
++		}
++		else
++		{
++			$columnsToDisplay = array('label',
++										'nb_visits',
++										$columnUniqueVisitors,
++										'nb_actions_per_visit',
++										'avg_time_on_site',
+ 										'bounce_rate',
+-										'conversion_rate'));
++										'conversion_rate');
++		}
++		
++		$this->setColumnsToDisplay($columnsToDisplay);
+ 		$this->dataTable->filter('ColumnCallbackReplace', array('avg_time_on_site', create_function('$averageTimeOnSite', 'return Piwik::getPrettyTimeFromSeconds($averageTimeOnSite);')));
+ 	}
+ }
+Index: core/Piwik.php
+===================================================================
+--- core/Piwik.php	(revision 3237)
++++ core/Piwik.php	(working copy)
+@@ -273,7 +273,7 @@
+ 				}
+ 			}
+ 		}
+-		$directoryMessage = "<p><b>Piwik couldn't write to some directories</b>.</p> <p>Try to Execute the following commands on your Linux server:</p>"
++		$directoryMessage = "<p><b>Intranet Statistics couldn't write to some directories</b>.</p> <p>Try to Execute the following commands on your Linux server:</p>"
+ 		                  . "<blockquote>$directoryList</blockquote>"
+ 		                  . "<p>If this doesn't work, you can try to create the directories with your FTP software, and set the CHMOD to 0777 (with your FTP software, right click on the directories, permissions).</p>"
+ 		                  . "<p>After applying the modifications, you can <a href='index.php'>refresh the page</a>.</p>"
+@@ -1073,7 +1073,7 @@
+ 	 */
+ 	public function getLogoPath()
+ 	{
+-		return Piwik_Common::getPathToPiwikRoot() . '/themes/default/images/logo.png';
++		return Piwik_Common::getPathToPiwikRoot() . '/themes/default/images/intranet-statistics-logo-02.jpg';
+ 	}
+ 	
+ 	/**
+

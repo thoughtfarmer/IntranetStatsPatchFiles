@@ -1,0 +1,53 @@
+Index: plugins/Actions/Actions.php
+===================================================================
+--- plugins/Actions/Actions.php	(revision 3237)
++++ plugins/Actions/Actions.php	(working copy)
+@@ -123,8 +123,8 @@
+ 	{
+ 		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPagesEntry', 'Actions', 'getEntryPageUrls');
+ 		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPagesExit', 'Actions', 'getExitPageUrls');
+-		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPages', 'Actions', 'getPageUrls');
+-		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPageTitles', 'Actions', 'getPageTitles');
++		//Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPages', 'Actions', 'getPageUrls');
++		//Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPageTitles', 'Actions', 'getPageTitles');
+ 		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuOutlinks', 'Actions', 'getOutlinks');
+ 		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuDownloads', 'Actions', 'getDownloads');
+ 	}
+@@ -132,10 +132,10 @@
+ 	function addMenus()
+ 	{
+ 		Piwik_AddMenu('Actions_Actions', '', array('module' => 'Actions', 'action' => 'getPageUrls'), true, 15);
+-		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPages', array('module' => 'Actions', 'action' => 'getPageUrls'), true, 1);
++		//Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPages', array('module' => 'Actions', 'action' => 'getPageUrls'), true, 1);
+ 		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPagesEntry', array('module' => 'Actions', 'action' => 'getEntryPageUrls'), true, 2);
+ 		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPagesExit', array('module' => 'Actions', 'action' => 'getExitPageUrls'), true, 3);
+-		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPageTitles', array('module' => 'Actions', 'action' => 'getPageTitles'), true, 4);
++		//Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPageTitles', array('module' => 'Actions', 'action' => 'getPageTitles'), true, 4);
+ 		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuOutlinks', array('module' => 'Actions', 'action' => 'getOutlinks'), true, 5);
+ 		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuDownloads', array('module' => 'Actions', 'action' => 'getDownloads'), true, 6);
+ 	}
+@@ -224,7 +224,7 @@
+ 							type,
+ 							count(distinct t1.idvisit) as nb_visits, 
+ 							count(distinct visitor_idcookie) as nb_uniq_visitors,
+-							count(*) as nb_hits							
++							count(*) as nb_hits
+ 					FROM (".$archiveProcessing->logTable." as t1
+ 						LEFT JOIN ".$archiveProcessing->logVisitActionTable." as t2 USING (idvisit))
+ 							LEFT JOIN ".$archiveProcessing->logActionTable." as t3 ON (t2.idaction_url = t3.idaction)
+Index: plugins/Actions/Controller.php
+===================================================================
+--- plugins/Actions/Controller.php	(revision 3237)
++++ plugins/Actions/Controller.php	(working copy)
+@@ -129,7 +129,10 @@
+ 
+ 	protected function configureViewPageTitles($view)
+ 	{
+-		$view->setColumnsToDisplay( array('label','nb_hits','nb_visits') );
++		$view->setColumnsToDisplay( array('label','nb_hits','nb_visits','nb_page_edit','nb_page_comment') );
++		
++		$view->setColumnTranslation('nb_page_edit', 'Edits');
++		$view->setColumnTranslation('nb_page_comment', 'Comments');
+ 	}
+ 	
+ 	public function getDownloads($fetch = false)

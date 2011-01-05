@@ -1,0 +1,22 @@
+Index: plugins/Installation/templates/structure.tpl
+===================================================================
+--- plugins/Installation/templates/structure.tpl	(revision 3237)
++++ plugins/Installation/templates/structure.tpl	(working copy)
+@@ -2,7 +2,7 @@
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+ <html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+-<title>Piwik &rsaquo; {'Installation_Installation'|translate}</title>
++<title>Intranet Statistics &rsaquo; {'Installation_Installation'|translate}</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+ 
+ <link rel="stylesheet" type="text/css" href="themes/default/common.css" />
+@@ -209,7 +209,7 @@
+ <div id="main">
+ 	<div id="content">
+ 		<div id="logo">
+-			<span id="title">Piwik</span> &nbsp;&nbsp;&nbsp;<span id="subtitle"># {'General_OpenSourceWebAnalytics'|translate}</span>
++			<span id="title">Intranet Statistics</span>
+ 		</div>
+ 		<div style="float:right" id="topRightBar">
+ 		<br />
