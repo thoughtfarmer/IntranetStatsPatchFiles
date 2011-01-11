@@ -1,6 +1,6 @@
 Index: plugins/Actions/Actions.php
 ===================================================================
---- plugins/Actions/Actions.php	(revision 3237)
+--- plugins/Actions/Actions.php	(revision 3645)
 +++ plugins/Actions/Actions.php	(working copy)
 @@ -123,8 +123,8 @@
  	{
@@ -37,7 +37,7 @@ Index: plugins/Actions/Actions.php
  							LEFT JOIN ".$archiveProcessing->logActionTable." as t3 ON (t2.idaction_url = t3.idaction)
 Index: plugins/Actions/Controller.php
 ===================================================================
---- plugins/Actions/Controller.php	(revision 3237)
+--- plugins/Actions/Controller.php	(revision 3645)
 +++ plugins/Actions/Controller.php	(working copy)
 @@ -129,7 +129,10 @@
  
