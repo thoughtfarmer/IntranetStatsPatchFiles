@@ -2,7 +2,7 @@ Index: plugins/SitesManager/API.php
 ===================================================================
 --- plugins/SitesManager/API.php	(revision 5)
 +++ plugins/SitesManager/API.php	(working copy)
-@@ -324,6 +324,9 @@
+@@ -323,6 +323,9 @@
  		$bind['excluded_parameters'] = $this->checkAndReturnExcludedQueryParameters($excludedQueryParameters);
  		$bind['timezone'] = $timezone;
  		$bind['currency'] = $currency;
@@ -12,7 +12,7 @@ Index: plugins/SitesManager/API.php
  		$db->insert(Piwik_Common::prefixTable("site"), $bind);
  									
  		$idSite = $db->lastInsertId();
-@@ -337,6 +340,22 @@
+@@ -336,6 +339,22 @@
  		return (int)$idSite;
  	}
  	
