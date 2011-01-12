@@ -16,7 +16,7 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 {
 	protected $actionsTable = null;
 	protected static $limitLevelSubCategory = 10;
-	protected static $categoryDelimiter = '/';
+	protected static $categoryDelimiter = '›';
 	protected static $defaultName = 'index';
 	
 	public function getInformation()
