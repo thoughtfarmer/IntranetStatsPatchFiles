@@ -1,0 +1,17 @@
+Index: plugins/CoreUpdater/Controller.php
+===================================================================
+--- plugins/CoreUpdater/Controller.php (revision 3553)
++++ plugins/CoreUpdater/Controller.php (revision 3652)
+@@ -139,4 +139,12 @@
+ 	private function oneClick_Copy()
+ 	{
++		/*
++		 * Make sure the execute bit is set for this shell script
++		 */
++		if(!Piwik_ArchiveProcessing::isBrowserTriggerArchivingEnabled())
++		{
++			@chmod($this->pathRootExtractedPiwik . '/misc/cron/archive.sh', 0755);
++		}
++
+ 		/*
+ 		 * Copy all files to PIWIK_INCLUDE_PATH.
