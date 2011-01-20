@@ -24,6 +24,16 @@ done
 # run scripts
 php ../scripts/updateTranslation.php
 
+# temporary 1.1.2b1 patches 
+if [ $VERSION = "1.1.2b1" ]
+then
+	for P in `ls ../patches/1.1.2b1-core-patches/*.patch`
+	do
+		patch -p0 < $P
+	done	
+	cp ../patches/1.1.2b1-core-patches/piwik-min.js.r3784 piwik.js
+fi
+
 # build release
 cd ..
 rm -rf $DISTNAME-$VERSION.tgz
