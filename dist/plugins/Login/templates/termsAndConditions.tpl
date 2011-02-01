@@ -4,7 +4,7 @@
 function submitLoginForm() {
 	var checked = $('#form_acceptterms').attr('checked');
 	if (checked) {
-		$.cookie("termsaccepted", 'true');
+		$.cookie("termsaccepted", 'true', { expires: 365 });
 		return true;
 	} else {
 		$.cookie("termsaccepted", 'false');
