@@ -13,6 +13,8 @@ svn export "http://dev.piwik.org/svn/tags/$VERSION" $DISTNAME
 # copy files
 cp -R plugins/ThoughtFarmer $DISTNAME/plugins
 cp -R images/* $DISTNAME/themes/default/images
+cp -R plugins/Login/templates/* $DISTNAME/plugins/Login/templates
+cp -R libs/jquery/* $DISTNAME/libs/jquery
 
 # apply patches
 cd $DISTNAME
