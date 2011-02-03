@@ -50,7 +50,7 @@ Index: plugins/Login/templates/login.tpl
  	</p>
 +
 +	<p class="acceptTermsCheckbox">
-+		<label><input name="form_acceptterms" id="form_acceptterms" value="1" tabindex="89" type="checkbox"> I accept the </label> <a id="termsLink" href="#">Terms and Conditions </a>
++		<label><input name="form_acceptterms" id="form_acceptterms" value="1" tabindex="89" type="checkbox" /> I accept the </label> <a id="termsLink" href="#">Terms and Conditions </a>
 +	</p>
 +
  	<p class="forgetmenot">
