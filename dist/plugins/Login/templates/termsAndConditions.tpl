@@ -81,26 +81,25 @@ $(document).ready(function() {
 .acceptTermsCheckbox {
 	font-weight:normal;
 }
-blockquote, li { margin-bottom: 18px; }
-ol { list-style-position: inside; }
 #acceptButton { 
 	font-weight: bold;
 	padding: 3px 18px; 
 }
+#terms p { margin-bottom: 18px; }
 </style>
 <div id="terms" class="termsBoxOuter">
 <h1>Terms and Conditions</h1>
 <h3>Please Read Carefully</h3>
 <div class="termsBoxInner">
-<blockquote>THIS IS PART OF A LEGAL AND ENFORCEABLE CONTRACT
+<p>THIS IS PART OF A LEGAL AND ENFORCEABLE CONTRACT
 BETWEEN YOU AND OPENROAD COMMUNICATIONS INC. ("OPENROAD") BY
 ACCESSING THIS SERVICE AND CLICKING ON THE &ldquo;AGREE&rdquo; OR
 &ldquo;YES&rdquo; BUTTON DURING THE REGISTRATION PROCESS YOU AGREE
 TO THIS AGREEMENT. IF YOU DO NOT AGREE TO THIS AGREEMENT DURING THE
 REGISTRATION PROCESS, CLICK ON THE &ldquo;I DO NOT AGREE&rdquo; OR
 &ldquo;NO&rdquo; BUTTON, AND MAKE NO FURTHER USE OF THE
-SERVICE.</blockquote>
-<blockquote>OPENROAD MAY IN ITS SOLE DISCRETION, BY POSTING A
+SERVICE.</p>
+<p>OPENROAD MAY IN ITS SOLE DISCRETION, BY POSTING A
 REVISED AGREEMENT ON THE WEBSITE STATS.THOUGHTFARMER.COM, CHANGE
 THE TERMS OF THIS AGREEMENT FROM TIME TO TIME AS IT RELATES TO YOUR
 FUTURE USE OF THIS SERVICE. BY USING THE SERVICE AFTER THE REVISED
@@ -109,47 +108,46 @@ AGREEMENT TO BE BOUND BY THE REVISED TERMS. YOU MAY NOT CHANGE
 THESE TERMS IN ANY MANNER. EACH TIME YOU USE THE SERVICE YOU
 SIGNIFY YOUR ACCEPTANCE AND AGREEMENT TO THE CURRENT VERSION OF
 THIS AGREEMENT. IF YOU DO NOT AGREE WITH EACH PROVISION OF THIS
-AGREEMENT, DO NOT USE THE SERVICE.</blockquote>
-<blockquote>OpenRoad Communications Ltd. (&ldquo;OpenRoad&rdquo;)
+AGREEMENT, DO NOT USE THE SERVICE.</p>
+<p>OpenRoad Communications Ltd. (&ldquo;OpenRoad&rdquo;)
 provides its online data management service for ThoughtFarmer
 intranet statistics commonly known as "Intranet Statistics"
 (&ldquo;Service&rdquo;) to you (&ldquo;Subscriber&rdquo;) upon the
 terms and conditions set out below. By using the Service,
 Subscriber agrees to abide by the terms of this agreement
-(&ldquo;Agreement&rdquo;).</blockquote>
-<ol>
-<li><strong>License.</strong> Your right to use the Service is
+(&ldquo;Agreement&rdquo;).</p>
+
+<p>1. &nbsp; <strong>License.</strong> Your right to use the Service is
 subject to this Agreement and is made subject to the GNU General
 Public License version 3 pursuant to which the software underlying
 the Service is provided. OpenRoad may from time to time modify or
 enhance the Service without notice to you. Your access to the
 Service will be terminated without notice if your maintenance
 account for OpenRoad's ThoughtFarmer software expires or is
-otherwise terminated.</li>
-<li><strong>Subscriber's Account.</strong> Subscriber is
+otherwise terminated.</p>
+<p>2. &nbsp; <strong>Subscriber's Account.</strong> Subscriber is
 responsible for all access to the Service by Subscriber's personnel
 or designated Users, whether or not Subscriber has knowledge of or
-authorizes such use.</li>
-<li><strong>Subscriber&rsquo;s Internal Policies.</strong> OpenRoad
+authorizes such use.</p>
+<p>3. &nbsp; <strong>Subscriber&rsquo;s Internal Policies.</strong> OpenRoad
 is not responsible for compliance with Subscriber&rsquo;s internal
-policies, regardless of whether it has notice of them.</li>
-<li><strong>Term.</strong> OpenRoad may in its sole discretion
+policies, regardless of whether it has notice of them.</p>
+<p>4. &nbsp; <strong>Term.</strong> OpenRoad may in its sole discretion
 discontinue offering the Service at anytime without notice to
-Subscriber.</li>
-<li><strong>Intellectual Property.</strong> ThoughtFarmer, the
+Subscriber.</p>
+<p>5. &nbsp; <strong>Intellectual Property.</strong> ThoughtFarmer, the
 ThoughtFarmer logo and other OpenRoad logos and product and service
 names, including without limitation "Intranet Statistics" are
 trademarks of OpenRoad (the &ldquo;OpenRoad Marks&rdquo;), whether
 or not registered. Without OpenRoad`s prior permission, Subscriber
 agrees not to display or use, in any manner, the OpenRoad
-Marks.</li>
-<li><strong>Prohibited Uses.</strong> Subscriber agrees not to
+Marks.</p>
+<p>6. &nbsp; <strong>Prohibited Uses.</strong> Subscriber agrees not to
 access the Service by any means other than through the interface
 that is provided by OpenRoad. Subscriber shall not access the
 Service for the purpose of data mining or extracting content from
-the Service beyond Subscriber&rsquo;s own data.</li>
-</ol>
-<blockquote>The Service has been designed so that each
+the Service beyond Subscriber&rsquo;s own data.</p>
+<p>The Service has been designed so that each
 Subscriber&rsquo;s data ("Subscriber's Data") can only be accessed
 by that Subscriber (including Subscriber&rsquo;s Users). Subscriber
 agrees that it will not attempt to access, download, copy or
@@ -163,9 +161,8 @@ information, then Subscriber agrees to treat such information as
 strictly confidential and promptly notify OpenRoad, and not to
 download, copy, transmit or otherwise use any of such unauthorized
 information, except as may be expressly authorized by
-OpenRoad.</blockquote>
-<ol start="7">
-<li><strong>Security.</strong> OpenRoad will maintain the Service
+OpenRoad.</p>
+<p>7. &nbsp; <strong>Security.</strong> OpenRoad will maintain the Service
 at a reputable third party hosting facility, where commercially
 reasonable security precautions are taken to prevent unauthorized
 access to the Service. Subscriber acknowledges that,
@@ -175,8 +172,8 @@ parties to circumvent such precautions and illegally gain access to
 the Service and Subscriber&rsquo;s Data. ACCORDINGLY, OPENROAD
 CANNOT AND DOES NOT GUARANTY THE PRIVACY, SECURITY, OR AUTHENTICITY
 OF ANY INFORMATION SO TRANSMITTED OR STORED IN ANY SYSTEM CONNECTED
-TO THE INTERNET.</li>
-<li><strong>Rights in Data.</strong> All property rights in the
+TO THE INTERNET.</p>
+<p>8. &nbsp; <strong>Rights in Data.</strong> All property rights in the
 Subscriber&rsquo;s Data that is provided by Subscriber, or by any
 party authorized by Subscriber to submit data to the Service,
 including without limitation copyrights, are and shall continue to
@@ -187,20 +184,18 @@ Subscriber. OpenRoad may provide statistical information, using
 Subscriber&rsquo;s data, to third parties, but such information
 will not include personally identifying information. OpenRoad may
 access Subscriber&rsquo;s Data to respond to service or technical
-problems with the Service.</li>
-</ol>
-<blockquote>OpenRoad shall retain Subscriber&rsquo;s Data for a
+problems with the Service.</p>
+<p>OpenRoad shall retain Subscriber&rsquo;s Data for a
 period of thirty (30) days after expiration or termination of this
 Agreement. After thirty (30 days), OpenRoad may delete and destroy
 all Subscriber&rsquo;s Data without notice or further liability to
-the Subscriber.</blockquote>
-<blockquote>OpenRoad reserves the right to establish (and notify
+the Subscriber.</p>
+<p>OpenRoad reserves the right to establish (and notify
 the Subscriber of) a maximum amount of memory or other computer
 storage and a maximum amount of Subscriber&rsquo;s Data that
 Subscriber may post, store, or transmit on or through the
-Service.</blockquote>
-<ol start="9">
-<li><strong>Responsibility/Indemnity.</strong> Subscriber is solely
+Service.</p>
+<p>9. &nbsp; <strong>Responsibility/Indemnity.</strong> Subscriber is solely
 responsible for all access to the Service and use of the
 Subscriber&rsquo;s Data by Subscriber&rsquo;s personnel or the use
 of Subscriber&rsquo;s account, whether or not Subscriber has
@@ -208,19 +203,16 @@ knowledge of or authorizes such use. Subscriber and Users shall
 maintain the confidentiality of password and account log-in
 identification. Subscriber agrees to indemnify and hold harmless
 OpenRoad against any liability or claim of any person that relates
-to or principally caused by Subscriber's use of the Service.</li>
-</ol>
-<blockquote>Subscriber acknowledges that OpenRoad has no control
+to or principally caused by Subscriber's use of the Service.</p>
+<p>Subscriber acknowledges that OpenRoad has no control
 over the source, quality, format, nature, ownership or legality of
 information submitted to the Service by the Subscriber or third
 parties and that the Subscriber is responsible for any claims or
 liabilities that may arise from the Subscriber&rsquo;s actions in
-extracting or submitting information to the Service.</blockquote>
-<ol start="10">
-<li><strong>Warranty.</strong></li>
-</ol>
-<blockquote>OpenRoad warrants that:</blockquote>
-<blockquote>(i) It has the power, authority and capacity, and has
+extracting or submitting information to the Service.</p>
+<p>10. &nbsp; <strong>Warranty.</strong></p>
+<p>OpenRoad warrants that:</p>
+<p>(i) It has the power, authority and capacity, and has
 received all necessary authorizations and approvals, to enter into
 this Agreement, (ii) it owns or has all rights in and to the
 intellectual property rights in the Service necessary to grant the
@@ -234,25 +226,23 @@ at the date of this Agreement<strong>,</strong> (v) OpenRoad will
 take all reasonable steps to ensure the Service will be free of
 viruses, malicious codes and spy-ware throughout the term of this
 Agreement, (vi) OpenRoad will undertake all reasonable efforts to
-correct any material errors in the service.</blockquote>
-<ol start="11">
-<li><strong>Disclaimer and Limitation of Liability.</strong></li>
-</ol>
-<blockquote>EXCEPT AS PROVIDED IN THE WARRANTY ABOVE SUBSCRIBER
-EXPRESSLY UNDERSTANDS AND AGREES THAT:</blockquote>
-<blockquote>SUBSCRIBER&rsquo;S USE OF THE SERVICE IS AT
+correct any material errors in the service.</p>
+<p>11. &nbsp; <strong>Disclaimer and Limitation of Liability.</strong></p>
+<p>EXCEPT AS PROVIDED IN THE WARRANTY ABOVE SUBSCRIBER
+EXPRESSLY UNDERSTANDS AND AGREES THAT:</p>
+<p>SUBSCRIBER&rsquo;S USE OF THE SERVICE IS AT
 SUBSCRIBER&rsquo;S SOLE RISK. THE SERVICE IS PROVIDED ON AN
 &ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE&rdquo;
-BASIS.</blockquote>
-<blockquote>OPENROAD MAKES NO REPRESENTATION OR WARRANTY THAT (i)
+BASIS.</p>
+<p>OPENROAD MAKES NO REPRESENTATION OR WARRANTY THAT (i)
 THE SERVICE WILL MEET SUBSCRIBER&rsquo;S REQUIREMENTS, (ii) THE
 SERVICE WILL BE UNINTERRUPTED, TIMELY, SECURE, OR ERROR-FREE, (iii)
 THE RESULTS THAT MAY BE OBTAINED FROM THE USE OF THE SERVICE WILL
 BE ACCURATE OR RELIABLE, (iv) THE PERFORMANCE OF THE INTERNET WILL
 BE UNINTERRUPTED OR PERFORM AT SPECIFIED RATES, (v)
 SUBSCRIBER&rsquo;S INTERNET SERVICE PROVIDER WILL PROVIDE
-UNINTERRUPTED SERVICE OR PERFORM AT SPECIFIED RATES.</blockquote>
-<blockquote>SUBSCRIBER EXPRESSLY UNDERSTANDS AND AGREES THAT
+UNINTERRUPTED SERVICE OR PERFORM AT SPECIFIED RATES.</p>
+<p>SUBSCRIBER EXPRESSLY UNDERSTANDS AND AGREES THAT
 OPENROAD SHALL NOT BE LIABLE FOR ANY, INDIRECT, INCIDENTAL,
 SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES, INCLUDING BUT NOT
 LIMITED TO, DAMAGES FOR LOSS OF REVENUES, PROFITS, GOODWILL, USE,
@@ -262,18 +252,17 @@ OPENROAD HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES),
 RESULTING FROM: (i) THE USE OR THE INABILITY TO USE THE SERVICE;
 (ii) INVALID DESTINATIONS, TRANSMISSION ERRORS, OR UNAUTHORIZED
 ACCESS TO OR ALTERATION OF SUBSCRIBER&rsquo;S TRANSMISSIONS OR
-SUBSCRIBER&rsquo;S DATA.</blockquote>
-<blockquote>NO CLAIM, REGARDLESS OF FORM, MAY BE MADE OR ACTION
+SUBSCRIBER&rsquo;S DATA.</p>
+<p>NO CLAIM, REGARDLESS OF FORM, MAY BE MADE OR ACTION
 BROUGHT BY EITHER PARTY MORE THAN ONE YEAR AFTER THE BASIS FOR THE
-CLAIM BECOMES KNOWN TO THE PARTY ASSERTING IT.</blockquote>
-<blockquote>WITHOUT LIMITING THE GENERALITY OF THE FOREGOING,
+CLAIM BECOMES KNOWN TO THE PARTY ASSERTING IT.</p>
+<p>WITHOUT LIMITING THE GENERALITY OF THE FOREGOING,
 OPENROAD LIABILITY TO SUBSCRIBER PURSUANT TO THIS AGREEMENT OR
 PURSUANT TO ANY OTHER LEGAL THEORY, INCLUDING LEGAL FEES AND
 AWARDABLE COSTS, SHALL NEVER EXCEED THE AMOUNT PAID BY SUBSCRIBER
 TO OPENROAD IN THE PREVIOUS TWELVE MONTHS FOR THE USE OF THE
-SERVICE .</blockquote>
-<ol start="12">
-<li><strong>Termination for Breach.</strong> Upon the occurrence of
+SERVICE .</p>
+<p>12. &nbsp; <strong>Termination for Breach.</strong> Upon the occurrence of
 any of the following events: (i) the other party materially
 breaches or defaults in any of the material terms or conditions of
 this Agreement, (ii) the other party makes any assignment for the
@@ -286,8 +275,8 @@ the ThoughtFarmer software is terminated, then the non-defaulting
 party may give the other party written notice of such default and
 an opportunity to cure the default within thirty (30) days after
 receipt of such notice, failing which the non-defaulting party may
-cancel this Agreement without notice.</li>
-<li><strong>Publicity.</strong> OpenRoad may use Subscriber&rsquo;s
+cancel this Agreement without notice.</p>
+<p>13. &nbsp; <strong>Publicity.</strong> OpenRoad may use Subscriber&rsquo;s
 name as part of a general list of customers and may refer to
 Subscriber as a user of the Service in general advertising and
 marketing materials. Each party shall obtain the other&rsquo;s
@@ -295,8 +284,8 @@ permission prior to using the other party&rsquo;s name for any
 other marketing or promotional purposes. The parties agree that any
 press release or other public comments issued by either party
 relating to this agreement will be prepared jointly between
-OpenRoad and the Subscriber.</li>
-<li><strong>Force Majeure.</strong> Neither party is liable for any
+OpenRoad and the Subscriber.</p>
+<p>14. &nbsp; <strong>Force Majeure.</strong> Neither party is liable for any
 delay, interruption or failure in the performance of its
 obligations if caused by acts of God, war (declared or undeclared),
 fire, flood, storm, slide, earthquake, power failure, inability to
@@ -306,32 +295,31 @@ control of the party affected which may prevent or delay such
 performance. If any such act or event occurs or is likely to occur,
 the party affected shall promptly notify the other, giving
 particulars of the event. The party so affected shall use
-reasonable efforts to eliminate or remedy the event.</li>
-<li><strong>Notices.</strong> All notices required to be given to
+reasonable efforts to eliminate or remedy the event.</p>
+<p>15. &nbsp; <strong>Notices.</strong> All notices required to be given to
 OpenRoad shall be given to OpenRoad as set out in the Schedule A.
 Any notice required to be given by OpenRoad may be given by e-mail
 to the address of Subscriber&rsquo;s Technical and Administrative
-Contact.</li>
-<li><strong>Counterparts/Facsimile.</strong> This agreement may be
+Contact.</p>
+<p>16. &nbsp; <strong>Counterparts/Facsimile.</strong> This agreement may be
 executed in two counterparts, each of which will be deemed to be an
 original, and both of which together shall constitute one
-agreement. This Agreement may be executed via facsimile.</li>
-<li><strong>Sole Agreement.</strong> This Agreement constitutes the
+agreement. This Agreement may be executed via facsimile.</p>
+<p>17. &nbsp; <strong>Sole Agreement.</strong> This Agreement constitutes the
 sole agreement between the parties with respect to the
-Service.</li>
-<li><strong>Governing Law.</strong> The laws of the British
+Service.</p>
+<p>18. &nbsp; <strong>Governing Law.</strong> The laws of the British
 Columbia govern this Agreement and all disputes arising out of it
 shall be submitted to a court of competent jurisdiction in British
-Columbia.</li>
-<li><strong>Assignment.</strong> This Agreement may not be assigned
-by Subscriber.</li>
-<li><strong>General Provisions.</strong> No waiver of any of the
+Columbia.</p>
+<p>19. &nbsp; <strong>Assignment.</strong> This Agreement may not be assigned
+by Subscriber.</p>
+<p>20. &nbsp; <strong>General Provisions.</strong> No waiver of any of the
 provisions of this Agreement shall be deemed to constitute a waiver
 of any other provision nor shall such a waiver constitute a
 continuing waiver unless otherwise expressly provided in writing
 duly executed by the party to be bound. This Agreement is binding
-upon the successors to and permitted assigns of the parties.</li>
-</ol>
+upon the successors to and permitted assigns of the parties.</p>
 </div>
 <p class="termsButtonsContainer">
 <input value="I Agree" tabindex="-1" id="acceptButton" type="button" class="termsButton" />
