@@ -101,7 +101,7 @@ REGISTRATION PROCESS, CLICK ON THE &ldquo;I DO NOT AGREE&rdquo; OR
 &ldquo;NO&rdquo; BUTTON, AND MAKE NO FURTHER USE OF THE
 SERVICE.</blockquote>
 <blockquote>OPENROAD MAY IN ITS SOLE DISCRETION, BY POSTING A
-REVISED AGREEMENT ON THE WEBSITE WWW.INTRANETSTATISTICS.COM, CHANGE
+REVISED AGREEMENT ON THE WEBSITE STATS.THOUGHTFARMER.COM, CHANGE
 THE TERMS OF THIS AGREEMENT FROM TIME TO TIME AS IT RELATES TO YOUR
 FUTURE USE OF THIS SERVICE. BY USING THE SERVICE AFTER THE REVISED
 AGREEMENT HAS BEEN POSTED, YOU SIGNIFY YOUR ACCEPTANCE AND
@@ -165,9 +165,6 @@ download, copy, transmit or otherwise use any of such unauthorized
 information, except as may be expressly authorized by
 OpenRoad.</blockquote>
 <ol start="7">
-<li><strong>Privacy.</strong> OpenRoad will at all times comply
-with the Privacy Policy as posted on its website at
-http://www.intranetstatistics.com/.</li>
 <li><strong>Security.</strong> OpenRoad will maintain the Service
 at a reputable third party hosting facility, where commercially
 reasonable security precautions are taken to prevent unauthorized
@@ -202,7 +199,7 @@ the Subscriber of) a maximum amount of memory or other computer
 storage and a maximum amount of Subscriber&rsquo;s Data that
 Subscriber may post, store, or transmit on or through the
 Service.</blockquote>
-<ol start="10">
+<ol start="9">
 <li><strong>Responsibility/Indemnity.</strong> Subscriber is solely
 responsible for all access to the Service and use of the
 Subscriber&rsquo;s Data by Subscriber&rsquo;s personnel or the use
@@ -219,7 +216,7 @@ information submitted to the Service by the Subscriber or third
 parties and that the Subscriber is responsible for any claims or
 liabilities that may arise from the Subscriber&rsquo;s actions in
 extracting or submitting information to the Service.</blockquote>
-<ol start="11">
+<ol start="10">
 <li><strong>Warranty.</strong></li>
 </ol>
 <blockquote>OpenRoad warrants that:</blockquote>
@@ -232,13 +229,13 @@ accordance with the terms of this Agreement does not , and will not
 infringe on the intellectual property rights of a third party, (iv)
 the Service will conform to the written descriptions that have been
 provided to the Subscriber as are set out in the Schedules to this
-Agreement and that are found at http://www.intranetstatistics.com/
+Agreement and that are found at http://stats.thoughtfarmer.com/
 at the date of this Agreement<strong>,</strong> (v) OpenRoad will
 take all reasonable steps to ensure the Service will be free of
 viruses, malicious codes and spy-ware throughout the term of this
 Agreement, (vi) OpenRoad will undertake all reasonable efforts to
 correct any material errors in the service.</blockquote>
-<ol start="12">
+<ol start="11">
 <li><strong>Disclaimer and Limitation of Liability.</strong></li>
 </ol>
 <blockquote>EXCEPT AS PROVIDED IN THE WARRANTY ABOVE SUBSCRIBER
@@ -275,7 +272,7 @@ PURSUANT TO ANY OTHER LEGAL THEORY, INCLUDING LEGAL FEES AND
 AWARDABLE COSTS, SHALL NEVER EXCEED THE AMOUNT PAID BY SUBSCRIBER
 TO OPENROAD IN THE PREVIOUS TWELVE MONTHS FOR THE USE OF THE
 SERVICE .</blockquote>
-<ol start="13">
+<ol start="12">
 <li><strong>Termination for Breach.</strong> Upon the occurrence of
 any of the following events: (i) the other party materially
 breaches or defaults in any of the material terms or conditions of
