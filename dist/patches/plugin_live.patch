@@ -1,8 +1,8 @@
 Index: plugins/Live/Visitor.php
 ===================================================================
---- plugins/Live/Visitor.php	(revision 3645)
+--- plugins/Live/Visitor.php	(revision 4152)
 +++ plugins/Live/Visitor.php	(working copy)
-@@ -81,7 +81,8 @@
+@@ -82,7 +82,8 @@
  			'goalName' => $this->getGoalName(),
     			'goalRevenue' => $this->getGoalRevenue(),
  			'goalUrl' => $this->getGoalUrl(),
@@ -12,7 +12,7 @@ Index: plugins/Live/Visitor.php
  		);
  	}
  
-@@ -381,4 +382,12 @@
+@@ -389,4 +390,12 @@
  		}
  		return false;
  	}
@@ -27,11 +27,11 @@ Index: plugins/Live/Visitor.php
  }
 Index: plugins/Live/templates/visitorLog.tpl
 ===================================================================
---- plugins/Live/templates/visitorLog.tpl	(revision 3645)
+--- plugins/Live/templates/visitorLog.tpl	(revision 4152)
 +++ plugins/Live/templates/visitorLog.tpl	(working copy)
-@@ -42,7 +42,8 @@
- 						{$visitor.columns.provider}
- 					</a>
+@@ -54,7 +54,8 @@
+ 						<br/><acronym title="{'CustomVariables_CustomVariables'|translate} (index {$id})">{$customVariable.name}</acronym>: {$customVariable.value}
+ 					{/foreach}
  				{/if}
 -				
 +				<br />{$visitor.columns.liveUsername}
@@ -41,9 +41,9 @@ Index: plugins/Live/templates/visitorLog.tpl
  		&nbsp;<img src="{$visitor.columns.countryFlag}" title="{$visitor.columns.country}, Provider {$visitor.columns.provider}" />
 Index: plugins/Live/templates/lastVisits.tpl
 ===================================================================
---- plugins/Live/templates/lastVisits.tpl	(revision 3645)
+--- plugins/Live/templates/lastVisits.tpl	(revision 4152)
 +++ plugins/Live/templates/lastVisits.tpl	(working copy)
-@@ -7,8 +7,7 @@
+@@ -8,8 +8,7 @@
  				&nbsp;<img src="{$visitor.browserIcon}" title="{$visitor.browser}, {'UserSettings_Plugins'|translate}: {$visitor.plugins}" />
  				&nbsp;<img src="{$visitor.operatingSystemIcon}" title="{$visitor.operatingSystem}, {$visitor.resolution}" />
  				&nbsp;{if $visitor.isVisitorGoalConverted}<img src="{$visitor.goalIcon}" title="{'Goals_GoalConversion'|translate} ({$visitor.goalType})" />{/if}

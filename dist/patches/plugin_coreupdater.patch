@@ -1,6 +1,6 @@
 Index: plugins/CoreUpdater/templates/header.tpl
 ===================================================================
---- plugins/CoreUpdater/templates/header.tpl	(revision 3645)
+--- plugins/CoreUpdater/templates/header.tpl	(revision 4152)
 +++ plugins/CoreUpdater/templates/header.tpl	(working copy)
 @@ -2,7 +2,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

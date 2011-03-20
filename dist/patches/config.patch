@@ -1,12 +1,14 @@
 Index: config/global.ini.php
 ===================================================================
---- config/global.ini.php	(revision 3645)
+--- config/global.ini.php	(revision 4152)
 +++ config/global.ini.php	(working copy)
-@@ -348,6 +348,7 @@
- Plugins[]		= PDFReports
+@@ -374,6 +374,9 @@
  Plugins[] 		= UserCountryMap
  Plugins[] 		= Live
+ Plugins[]		= CustomVariables
 +Plugins[]		= ThoughtFarmer
- 
++Plugins[]		= ThoughtFarmerUser
++
  [PluginsInstalled]
  PluginsInstalled[] = Login
+ PluginsInstalled[] = CoreAdminHome

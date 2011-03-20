@@ -1,9 +1,9 @@
 Index: core/Tracker/Action.php
 ===================================================================
---- core/Tracker/Action.php	(revision 3645)
+--- core/Tracker/Action.php	(revision 4152)
 +++ core/Tracker/Action.php	(working copy)
-@@ -261,7 +261,7 @@
- 			$this->idActionUrl = Piwik_Tracker::getDatabase()->lastInsertId();
+@@ -262,7 +262,7 @@
+ 			printDebug("Recording a new page URL in the lookup table: ". $this->idActionUrl);
  		}
  	}
 -	
@@ -11,7 +11,7 @@ Index: core/Tracker/Action.php
  	/**
  	 * @param int $idSite
  	 */
-@@ -269,6 +269,11 @@
+@@ -270,6 +270,11 @@
  	{
  		$this->idSite = $idSite;
  	}
@@ -21,9 +21,9 @@ Index: core/Tracker/Action.php
 +		return $this->idSite;
 +	}
  	
- 	
- 	/**
-@@ -310,7 +315,7 @@
+ 	function setTimestamp($timestamp)
+ 	{
+@@ -325,7 +330,7 @@
  		*/ 
  		Piwik_PostEvent('Tracker.Action.record', $this, $info);
  	 }
@@ -32,7 +32,7 @@ Index: core/Tracker/Action.php
  	/**
  	 * Returns the ID of the newly created record in the log_link_visit_action table
  	 *
-@@ -320,7 +325,7 @@
+@@ -335,7 +340,7 @@
  	{
  		return $this->idLinkVisitAction;
  	}
@@ -43,9 +43,9 @@ Index: core/Tracker/Action.php
  	 * Sets the name as $this->actionName
 Index: core/ViewDataTable.php
 ===================================================================
---- core/ViewDataTable.php	(revision 3645)
+--- core/ViewDataTable.php	(revision 4152)
 +++ core/ViewDataTable.php	(working copy)
-@@ -137,6 +137,14 @@
+@@ -144,6 +144,14 @@
  	protected $columnsToDisplay = array();
  
  	/**
@@ -60,7 +60,7 @@ Index: core/ViewDataTable.php
  	 * Variable that is used as the DIV ID in the rendered HTML
  	 *
  	 * @var string
-@@ -359,7 +367,7 @@
+@@ -366,7 +374,7 @@
  	{		
  		// we build the request string (URL) to call the API
  		$requestString = $this->getRequestString();
@@ -69,7 +69,7 @@ Index: core/ViewDataTable.php
  		// we make the request to the API
  		$request = new Piwik_API_Request($requestString);
  		
-@@ -919,6 +927,19 @@
+@@ -947,6 +955,19 @@
  	}
  
  	/**
@@ -91,7 +91,7 @@ Index: core/ViewDataTable.php
  	 * @param array PHP array conversion of the data table
 Index: core/ViewDataTable/HtmlTable/AllColumns.php
 ===================================================================
---- core/ViewDataTable/HtmlTable/AllColumns.php	(revision 3645)
+--- core/ViewDataTable/HtmlTable/AllColumns.php	(revision 4152)
 +++ core/ViewDataTable/HtmlTable/AllColumns.php	(working copy)
 @@ -42,13 +42,23 @@
  		{
@@ -125,7 +125,7 @@ Index: core/ViewDataTable/HtmlTable/AllColumns.php
  }
 Index: core/Piwik.php
 ===================================================================
---- core/Piwik.php	(revision 3645)
+--- core/Piwik.php	(revision 4152)
 +++ core/Piwik.php	(working copy)
 @@ -335,7 +335,7 @@
  				}
@@ -136,7 +136,7 @@ Index: core/Piwik.php
  		                  . "<blockquote>$directoryList</blockquote>"
  		                  . "<p>If this doesn't work, you can try to create the directories with your FTP software, and set the CHMOD to 0777 (with your FTP software, right click on the directories, permissions).</p>"
  		                  . "<p>After applying the modifications, you can <a href='index.php'>refresh the page</a>.</p>"
-@@ -1314,7 +1314,7 @@
+@@ -1320,7 +1320,7 @@
  	 */
  	public function getLogoPath()
  	{

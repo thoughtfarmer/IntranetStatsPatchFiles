@@ -1,8 +1,8 @@
 Index: plugins/Actions/Actions.php
 ===================================================================
---- plugins/Actions/Actions.php	(revision 3645)
+--- plugins/Actions/Actions.php	(revision 4152)
 +++ plugins/Actions/Actions.php	(working copy)
-@@ -123,8 +123,8 @@
+@@ -168,8 +168,8 @@
  	{
  		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPagesEntry', 'Actions', 'getEntryPageUrls');
  		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPagesExit', 'Actions', 'getExitPageUrls');
@@ -13,7 +13,7 @@ Index: plugins/Actions/Actions.php
  		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuOutlinks', 'Actions', 'getOutlinks');
  		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuDownloads', 'Actions', 'getDownloads');
  	}
-@@ -132,10 +132,10 @@
+@@ -177,10 +177,10 @@
  	function addMenus()
  	{
  		Piwik_AddMenu('Actions_Actions', '', array('module' => 'Actions', 'action' => 'getPageUrls'), true, 15);
@@ -26,28 +26,40 @@ Index: plugins/Actions/Actions.php
  		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuOutlinks', array('module' => 'Actions', 'action' => 'getOutlinks'), true, 5);
  		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuDownloads', array('module' => 'Actions', 'action' => 'getDownloads'), true, 6);
  	}
-@@ -224,7 +224,7 @@
- 							type,
- 							count(distinct t1.idvisit) as nb_visits, 
- 							count(distinct visitor_idcookie) as nb_uniq_visitors,
--							count(*) as nb_hits							
-+							count(*) as nb_hits
- 					FROM (".$archiveProcessing->logTable." as t1
- 						LEFT JOIN ".$archiveProcessing->logVisitActionTable." as t2 USING (idvisit))
- 							LEFT JOIN ".$archiveProcessing->logActionTable." as t3 ON (t2.idaction_url = t3.idaction)
 Index: plugins/Actions/Controller.php
 ===================================================================
---- plugins/Actions/Controller.php	(revision 3645)
+--- plugins/Actions/Controller.php	(revision 4152)
 +++ plugins/Actions/Controller.php	(working copy)
-@@ -129,7 +129,10 @@
+@@ -46,6 +46,14 @@
+ 		return $this->renderView($view, $fetch);
+ 	}
  
- 	protected function configureViewPageTitles($view)
- 	{
--		$view->setColumnsToDisplay( array('label','nb_hits','nb_visits') );
++	protected function configureViewPageTitles($view)
++	{
 +		$view->setColumnsToDisplay( array('label','nb_hits','nb_visits','nb_page_edit','nb_page_comment') );
-+		
++
 +		$view->setColumnTranslation('nb_page_edit', 'Edits');
 +		$view->setColumnTranslation('nb_page_comment', 'Comments');
++	}
++
+ 	protected function configureViewPages($view)
+ 	{
+ 		$view->setColumnsToDisplay( array('label','nb_hits','nb_visits', 'bounce_rate', 'avg_time_on_page', 'exit_rate') );
+@@ -110,7 +118,7 @@
+ 						'Actions.getPageTitles',
+ 						'getPageTitlesSubDataTable' );
+ 		$view->setColumnTranslation('label', Piwik_Translate('Actions_ColumnPageName'));
+-		$this->configureViewPages($view);
++		$this->configureViewPageTitles($view);
+ 		$this->configureViewActions($view);
+ 		return $this->renderView($view, $fetch);
  	}
- 	
- 	public function getDownloads($fetch = false)
+@@ -122,7 +130,7 @@
+ 						__FUNCTION__,
+ 						'Actions.getPageTitles',
+ 						'getPageTitlesSubDataTable'  );
+-		$this->configureViewPages($view);
++		$this->configureViewPageTitles($view);
+ 		$this->configureViewActions($view);
+ 		return $this->renderView($view, $fetch);
+ 	}

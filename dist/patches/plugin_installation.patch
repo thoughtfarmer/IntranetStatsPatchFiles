@@ -1,6 +1,6 @@
 Index: plugins/Installation/templates/structure.tpl
 ===================================================================
---- plugins/Installation/templates/structure.tpl	(revision 3645)
+--- plugins/Installation/templates/structure.tpl	(revision 4152)
 +++ plugins/Installation/templates/structure.tpl	(working copy)
 @@ -2,7 +2,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

@@ -1,6 +1,6 @@
 Index: themes/default/common.css
 ===================================================================
---- themes/default/common.css	(revision 3645)
+--- themes/default/common.css	(revision 4152)
 +++ themes/default/common.css	(working copy)
 @@ -213,6 +213,12 @@
  	font:42px Georgia, "Times New Roman", Times, serif;
@@ -17,7 +17,7 @@ Index: themes/default/common.css
  
 Index: themes/default/simple_structure_header.tpl
 ===================================================================
---- themes/default/simple_structure_header.tpl	(revision 3645)
+--- themes/default/simple_structure_header.tpl	(revision 4152)
 +++ themes/default/simple_structure_header.tpl	(working copy)
 @@ -7,5 +7,5 @@
  </head>

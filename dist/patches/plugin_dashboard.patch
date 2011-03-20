@@ -1,4 +1,6 @@
---- plugins/Dashboard/Controller.php	(revision 3645)
+Index: plugins/Dashboard/Controller.php
+===================================================================
+--- plugins/Dashboard/Controller.php	(revision 4152)
 +++ plugins/Dashboard/Controller.php	(working copy)
 @@ -178,24 +178,20 @@
  	protected function getDefaultLayout()

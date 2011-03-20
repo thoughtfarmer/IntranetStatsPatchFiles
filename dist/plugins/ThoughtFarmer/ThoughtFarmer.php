@@ -114,7 +114,7 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 					LEFT JOIN `".Piwik_Common::prefixTable('log_link_visit_action')."` as t3 USING(idvisit)
 			    WHERE visit_last_action_time >= ?
 					AND visit_last_action_time <= ?
-				 	AND idsite = ?
+				 	AND t1.idsite = ?
 					AND thoughtfarmer_username is not null
 			    GROUP BY t1.`thoughtfarmer_username` ORDER BY nb_visits DESC";
 
@@ -131,7 +131,7 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 						JOIN ".Piwik_Common::prefixTable("thoughtfarmer_action")." as t2 USING(idvisit)
 					WHERE visit_last_action_time >= ?
 						AND visit_last_action_time <= ?
-						AND idsite = ?
+						AND t1.idsite = ?
 					GROUP BY t1.thoughtfarmer_username";
 
 		$pageResults = Zend_Registry::get('db')->fetchAll($query,
@@ -174,11 +174,11 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_COMMENT.",1,0)) as nb_page_comment
 					FROM ".$archiveProcessing->logTable." as t1
 						JOIN ".Piwik_Common::prefixTable("thoughtfarmer_action")." as t2 USING(idvisit)
-						JOIN ".$archiveProcessing->logActionTable." as t4 ON (t2.idaction_thoughtfarmer = t4.idaction)
-						JOIN ".$archiveProcessing->logActionTable." as t3 ON (t2.idaction_url = t3.idaction)
+						JOIN ".Piwik_Common::prefixTable("log_action")." as t4 ON (t2.idaction_thoughtfarmer = t4.idaction)
+						JOIN ".Piwik_Common::prefixTable("log_action")." as t3 ON (t2.idaction_url = t3.idaction)
 					WHERE visit_last_action_time >= ?
 						AND visit_last_action_time <= ?
-						AND idsite = ?
+						AND t1.idsite = ?
 					GROUP BY t4.idaction, t1.thoughtfarmer_username";
 
 
@@ -243,7 +243,7 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 					JOIN `".Piwik_Common::prefixTable('thoughtfarmer_search')."` as t2 USING(idvisit)
 			    WHERE visit_last_action_time >= ?
 					AND visit_last_action_time <= ?
-				 	AND idsite = ?
+				 	AND t1.idsite = ?
 			    GROUP BY t2.`search_phrase` ORDER BY nb_visits DESC";
 
 
@@ -266,7 +266,7 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 					JOIN `".Piwik_Common::prefixTable('thoughtfarmer_search')."` as t2 USING(idvisit)
 			    WHERE visit_last_action_time >= ?
 					AND visit_last_action_time <= ?
-				 	AND idsite = ?
+				 	AND t1.idsite = ?
 			    GROUP BY t2.`search_phrase`, t1.thoughtfarmer_username";
 
 		$results = Zend_Registry::get('db')->fetchAll($query,
@@ -317,15 +317,15 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 		$query = "SELECT 	t3.name as url,
 							t4.name as name,
 							count(distinct t1.idvisit) as nb_visits,
-							count(distinct visitor_idcookie) as nb_uniq_visitors,
+							count(distinct t1.idvisitor) as nb_uniq_visitors,
 							count(*) as nb_hits
 					FROM (".$archiveProcessing->logTable." as t1
-						LEFT JOIN ".$archiveProcessing->logVisitActionTable." as t2 USING (idvisit))
-							LEFT JOIN ".$archiveProcessing->logActionTable." as t3 ON (t2.idaction_url = t3.idaction)
-								LEFT JOIN ".$archiveProcessing->logActionTable." as t4 ON (t2.idaction_thoughtfarmer = t4.idaction)
+						LEFT JOIN ".Piwik_Common::prefixTable("log_link_visit_action")." as t2 USING (idvisit))
+							LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t3 ON (t2.idaction_url = t3.idaction)
+								LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t4 ON (t2.idaction_thoughtfarmer = t4.idaction)
 					WHERE visit_last_action_time >= ?
 						AND visit_last_action_time <= ?
-						AND idsite = ?
+						AND t1.idsite = ?
 					GROUP BY t4.idaction
 					ORDER BY nb_hits DESC";
 
@@ -339,11 +339,11 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_COMMENT.",1,0)) as nb_page_comment
 					FROM (".$archiveProcessing->logTable." as t1
 						LEFT JOIN ".Piwik_Common::prefixTable("thoughtfarmer_action")." as t2 USING (idvisit))
-							LEFT JOIN ".$archiveProcessing->logActionTable." as t3 ON (t2.idaction_url = t3.idaction)
-								LEFT JOIN ".$archiveProcessing->logActionTable." as t4 ON (t2.idaction_thoughtfarmer = t4.idaction)
+							LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t3 ON (t2.idaction_url = t3.idaction)
+								LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t4 ON (t2.idaction_thoughtfarmer = t4.idaction)
 					WHERE visit_last_action_time >= ?
 						AND visit_last_action_time <= ?
-						AND idsite = ?
+						AND t1.idsite = ?
 					GROUP BY t4.idaction";
 
 		$query = $archiveProcessing->db->query($query, array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite ));
@@ -364,15 +364,15 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 		$query = "SELECT 	t3.name as url,
 							t4.name as name,
 							count(distinct t1.idvisit) as nb_visits,
-							count(distinct visitor_idcookie) as nb_uniq_visitors,
+							count(distinct t1.idvisitor) as nb_uniq_visitors,
 							count(*) as nb_hits
 					FROM (".$archiveProcessing->logTable." as t1
-						LEFT JOIN ".$archiveProcessing->logVisitActionTable." as t2 USING (idvisit))
-							LEFT JOIN ".$archiveProcessing->logActionTable." as t3 ON (t2.idaction_url = t3.idaction)
-								LEFT JOIN ".$archiveProcessing->logActionTable." as t4 ON (t2.idaction_name = t4.idaction)
+						LEFT JOIN ".Piwik_Common::prefixTable("log_link_visit_action")." as t2 USING (idvisit))
+							LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t3 ON (t2.idaction_url = t3.idaction)
+								LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t4 ON (t2.idaction_name = t4.idaction)
 					WHERE visit_last_action_time >= ?
 						AND visit_last_action_time <= ?
-						AND idsite = ?
+						AND t1.idsite = ?
 					GROUP BY t4.idaction
 					ORDER BY nb_hits DESC";
 
@@ -386,11 +386,11 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_COMMENT.",1,0)) as nb_page_comment
 					FROM (".$archiveProcessing->logTable." as t1
 						LEFT JOIN ".Piwik_Common::prefixTable("thoughtfarmer_action")." as t2 USING (idvisit))
-							LEFT JOIN ".$archiveProcessing->logActionTable." as t3 ON (t2.idaction_url = t3.idaction)
-								LEFT JOIN ".$archiveProcessing->logActionTable." as t4 ON (t2.idaction_name = t4.idaction)
+							LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t3 ON (t2.idaction_url = t3.idaction)
+								LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t4 ON (t2.idaction_name = t4.idaction)
 					WHERE visit_last_action_time >= ?
 						AND visit_last_action_time <= ?
-						AND idsite = ?
+						AND t1.idsite = ?
 					GROUP BY t4.idaction";
 
 		$query = $archiveProcessing->db->query($query, array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite ));

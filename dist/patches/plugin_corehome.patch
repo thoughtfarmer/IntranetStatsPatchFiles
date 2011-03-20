@@ -1,17 +1,21 @@
 Index: plugins/CoreHome/templates/logo.tpl
 ===================================================================
---- plugins/CoreHome/templates/logo.tpl	(revision 3645)
+--- plugins/CoreHome/templates/logo.tpl	(revision 4152)
 +++ plugins/CoreHome/templates/logo.tpl	(working copy)
-@@ -1,5 +1,4 @@
+@@ -1,9 +1,4 @@
  <span id="logo">
 -<a href="index.php" title="Piwik # {'General_OpenSourceWebAnalytics'|translate}" style="text-decoration: none;">
--	<span style="color: rgb(245, 223, 114);">P</span><span style="color: rgb(241, 175, 108);">i</span><span style="color: rgb(241, 117, 117);">w</span><span style="color: rgb(155, 106, 58);">i</span><span style="color: rgb(107, 50, 11);">k</span>
+-	<img src='themes/default/images/logo-header.png' style='margin-left:10px'>
+-	{*
+-	Text logo: <span style="color: rgb(245, 223, 114);">P</span><span style="color: rgb(241, 175, 108);">i</span><span style="color: rgb(241, 117, 117);">w</span><span style="color: rgb(155, 106, 58);">i</span><span style="color: rgb(107, 50, 11);">k</span>
+-	*}
+-	
 +<a href="index.php" title="Intranet Statistics" style="text-decoration: none;">
  </a>
  </span>
 Index: plugins/CoreHome/templates/header.tpl
 ===================================================================
---- plugins/CoreHome/templates/header.tpl	(revision 3645)
+--- plugins/CoreHome/templates/header.tpl	(revision 4152)
 +++ plugins/CoreHome/templates/header.tpl	(working copy)
 @@ -2,7 +2,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -20,5 +24,5 @@ Index: plugins/CoreHome/templates/header.tpl
 -<title>Piwik &rsaquo; {'CoreHome_WebAnalyticsReports'|translate}</title>
 +<title>Intranet Statistics &rsaquo; {'CoreHome_WebAnalyticsReports'|translate}</title>
  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
- <meta name="generator" content="Piwik {$piwik_version}" />
+ <meta name="generator" content="Piwik - Open Source Web Analytics" />
  <meta name="description" content="Web Analytics report for '{$siteName|escape}' - Piwik" />
