@@ -169,7 +169,7 @@ class Piwik_ThoughtFarmer_Action extends Piwik_Tracker_Action
 		);
 	}
 	
-	public function record($idVisit, $idRefererAction, $timeSpentRefererAction)
+	public function record($idVisit, $visitorIdCookie, $idRefererActionUrl, $idRefererActionName, $timeSpentRefererAction)
 	{
 		// should we record "standard" piwik action
 		$recordAction = true;
@@ -226,7 +226,7 @@ class Piwik_ThoughtFarmer_Action extends Piwik_Tracker_Action
 
 		if ($recordAction === true)
 		{
-			$this->recordAction($idVisit, $idRefererAction, $timeSpentRefererAction);
+			$this->recordAction($idVisit, $visitorIdCookie, $idRefererActionUrl, $idRefererActionName, $timeSpentRefererAction);
 		}
 	}
 }
