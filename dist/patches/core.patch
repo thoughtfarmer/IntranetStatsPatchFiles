@@ -2,6 +2,19 @@ Index: core/Tracker/Action.php
 ===================================================================
 --- core/Tracker/Action.php	(revision 4152)
 +++ core/Tracker/Action.php	(working copy)
+@@ -45,9 +45,9 @@
+ class Piwik_Tracker_Action implements Piwik_Tracker_Action_Interface
+ {
+ 	private $request;
+-	private $idSite;
+-	private $timestamp;
+-	private $idLinkVisitAction;
++	protected $idSite;
++	protected $timestamp;
++	protected $idLinkVisitAction;
+ 	private $idActionName = null;
+ 	private $idActionUrl = null;
+ 
 @@ -262,7 +262,7 @@
  			printDebug("Recording a new page URL in the lookup table: ". $this->idActionUrl);
  		}

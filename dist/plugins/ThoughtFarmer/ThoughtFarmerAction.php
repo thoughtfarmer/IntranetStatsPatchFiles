@@ -102,7 +102,7 @@ class Piwik_ThoughtFarmer_Action extends Piwik_Tracker_Action
 
 
 
-	protected function recordAction( $idVisit, $idRefererAction, $timeSpentRefererAction)
+	protected function recordAction( $idVisit, $visitorIdCookie, $idRefererActionUrl, $idRefererActionName, $timeSpentRefererAction )
 	{
 		$this->loadIdActionNameAndUrl();
 
@@ -119,22 +119,34 @@ class Piwik_ThoughtFarmer_Action extends Piwik_Tracker_Action
 		}
 
 		Piwik_Tracker::getDatabase()->query("INSERT INTO ".Piwik_Common::prefixTable('log_link_visit_action')
-						." (idvisit, idaction_url, idaction_name, idaction_url_ref, idaction_thoughtfarmer, time_spent_ref_action)
-							VALUES (?,?,?,?,?,?)",
-					array($idVisit, $this->getIdActionUrl(), $idActionName , $idRefererAction, $idThoughtFarmer, $timeSpentRefererAction)
-					);
+                                                ." (idvisit, idsite, idvisitor, server_time, idaction_url, idaction_name, idaction_url_ref, idaction_thoughtfarmer, idaction_name_ref, time_spent_ref_action)
+                                                        VALUES (?,?,?,?,?,?,?,?,?,?)",
+						array(  $idVisit,
+                                                        $this->getIdSite(),
+                                                        $visitorIdCookie,
+                                                        Piwik_Tracker::getDatetimeFromTimestamp($this->timestamp),
+                                                        $this->getIdActionUrl(),
+                                                        $idActionName ,
+                                                        $idRefererActionUrl,
+                                                        $idRefererActionName,
+							$idThoughtFarmer,
+                                                        $timeSpentRefererAction
+                ));
+
 
 		$idLinkVisitAction = Piwik_Tracker::getDatabase()->lastInsertId();
 
-		$info = array(
-			'idSite' => $this->getIdSite(),
-			'idLinkVisitAction' => $idLinkVisitAction,
-			'idVisit' => $idVisit,
-			'idRefererAction' => $idRefererAction,
-			'idThoughtFarmerAction' => $idThoughtFarmer,
-			'timeSpentRefererAction' => $timeSpentRefererAction,
-		);
-		printDebug($info);
+                $info = array(
+                        'idSite' => $this->getIdSite(),
+                        'idLinkVisitAction' => $this->idLinkVisitAction,
+                        'idVisit' => $idVisit,
+                        'idRefererActionUrl' => $idRefererActionUrl,
+                        'idRefererActionName' => $idRefererActionName,
+			'idThoughtFarmer' => $idThoughtFarmer,
+                        'timeSpentRefererAction' => $timeSpentRefererAction,
+                );
+                printDebug($info);
+
 
 		/*
 		* send the Action object ($this)  and the list of ids ($info) as arguments to the event
