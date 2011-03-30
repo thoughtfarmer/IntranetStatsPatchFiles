@@ -47,7 +47,7 @@ class Piwik_ThoughtFarmer_Controller extends Piwik_Controller
 						'getUserActivitySubtable'
 				);
 		
-		$view->setColumnsToDisplay( array('label', 'nb_visits', 'nb_hits') );
+		$view->setColumnsToDisplay( array('label','nb_visits','nb_hits','nb_searches','nb_page_edit','nb_page_comment'));
 		$view->setTableAllColumnsToDisplay( array('label','nb_visits','nb_hits','nb_searches','nb_page_edit','nb_page_comment'));
 		
 		$view->setSortedColumn( 'nb_hits' );
