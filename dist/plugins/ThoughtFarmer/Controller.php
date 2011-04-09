@@ -32,6 +32,7 @@ class Piwik_ThoughtFarmer_Controller extends Piwik_Controller
 	{
 		$this->initColumnTranslations($view);
 		$view->disableExcludeLowPopulation();
+		$view->disableShowAllColumns();
 		$view->setLimit( 10 );
 	}
 
