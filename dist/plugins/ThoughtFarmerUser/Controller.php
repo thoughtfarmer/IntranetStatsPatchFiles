@@ -20,6 +20,7 @@ class Piwik_ThoughtFarmerUser_Controller extends Piwik_Controller
 
 		$view->disableOffsetInformationAndPaginationControls();
 		$view->disableExcludeLowPopulation();
+		$view->disableShowAllColumns();
 		$view->setLimit( 10 );
 		
 		return $this->renderView($view, $fetch);
