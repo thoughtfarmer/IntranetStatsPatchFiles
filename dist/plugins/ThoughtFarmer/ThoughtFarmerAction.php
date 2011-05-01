@@ -119,7 +119,7 @@ class Piwik_ThoughtFarmer_Action extends Piwik_Tracker_Action
 		}
 
 		Piwik_Tracker::getDatabase()->query("INSERT INTO ".Piwik_Common::prefixTable('log_link_visit_action')
-                                                ." (idvisit, idsite, idvisitor, server_time, idaction_url, idaction_name, idaction_url_ref, idaction_thoughtfarmer, idaction_name_ref, time_spent_ref_action)
+                                                ." (idvisit, idsite, idvisitor, server_time, idaction_url, idaction_name, idaction_url_ref, idaction_name_ref, idaction_thoughtfarmer, time_spent_ref_action)
                                                         VALUES (?,?,?,?,?,?,?,?,?,?)",
 						array(  $idVisit,
                                                         $this->getIdSite(),
