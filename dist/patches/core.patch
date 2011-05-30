@@ -1,6 +1,6 @@
 Index: core/Tracker/Action.php
 ===================================================================
---- core/Tracker/Action.php	(revision 4152)
+--- core/Tracker/Action.php	(revision 4837)
 +++ core/Tracker/Action.php	(working copy)
 @@ -45,9 +45,9 @@
  class Piwik_Tracker_Action implements Piwik_Tracker_Action_Interface
@@ -15,7 +15,7 @@ Index: core/Tracker/Action.php
  	private $idActionName = null;
  	private $idActionUrl = null;
  
-@@ -262,7 +262,7 @@
+@@ -265,7 +265,7 @@
  			printDebug("Recording a new page URL in the lookup table: ". $this->idActionUrl);
  		}
  	}
@@ -24,7 +24,7 @@ Index: core/Tracker/Action.php
  	/**
  	 * @param int $idSite
  	 */
-@@ -270,6 +270,11 @@
+@@ -273,6 +273,11 @@
  	{
  		$this->idSite = $idSite;
  	}
@@ -36,7 +36,7 @@ Index: core/Tracker/Action.php
  	
  	function setTimestamp($timestamp)
  	{
-@@ -325,7 +330,7 @@
+@@ -328,7 +333,7 @@
  		*/ 
  		Piwik_PostEvent('Tracker.Action.record', $this, $info);
  	 }
@@ -45,7 +45,7 @@ Index: core/Tracker/Action.php
  	/**
  	 * Returns the ID of the newly created record in the log_link_visit_action table
  	 *
-@@ -335,7 +340,7 @@
+@@ -338,7 +343,7 @@
  	{
  		return $this->idLinkVisitAction;
  	}
@@ -56,7 +56,7 @@ Index: core/Tracker/Action.php
  	 * Sets the name as $this->actionName
 Index: core/ViewDataTable.php
 ===================================================================
---- core/ViewDataTable.php	(revision 4152)
+--- core/ViewDataTable.php	(revision 4837)
 +++ core/ViewDataTable.php	(working copy)
 @@ -144,6 +144,14 @@
  	protected $columnsToDisplay = array();
@@ -74,7 +74,7 @@ Index: core/ViewDataTable.php
  	 *
  	 * @var string
 @@ -366,7 +374,7 @@
- 	{		
+ 	{
  		// we build the request string (URL) to call the API
  		$requestString = $this->getRequestString();
 -		
@@ -82,7 +82,7 @@ Index: core/ViewDataTable.php
  		// we make the request to the API
  		$request = new Piwik_API_Request($requestString);
  		
-@@ -947,6 +955,19 @@
+@@ -961,6 +969,19 @@
  	}
  
  	/**
@@ -102,45 +102,11 @@ Index: core/ViewDataTable.php
  	 * Returns columns names to display, in order.
  	 * If no columns were specified to be displayed, return all columns found in the first row.
  	 * @param array PHP array conversion of the data table
-Index: core/ViewDataTable/HtmlTable/AllColumns.php
-===================================================================
---- core/ViewDataTable/HtmlTable/AllColumns.php	(revision 4152)
-+++ core/ViewDataTable/HtmlTable/AllColumns.php	(working copy)
-@@ -42,13 +42,23 @@
- 		{
- 			$columnUniqueVisitors = 'nb_uniq_visitors';
- 		}
--		$this->setColumnsToDisplay(array('label', 
--										'nb_visits', 
--										$columnUniqueVisitors, 
--										'nb_actions_per_visit', 
--										'avg_time_on_site', 
-+
-+		if( count($this->tableAllColumnsToDisplay) )
-+		{
-+			$columnsToDisplay = $this->tableAllColumnsToDisplay;
-+		}
-+		else
-+		{
-+			$columnsToDisplay = array('label',
-+										'nb_visits',
-+										$columnUniqueVisitors,
-+										'nb_actions_per_visit',
-+										'avg_time_on_site',
- 										'bounce_rate',
--										'conversion_rate'));
-+										'conversion_rate');
-+		}
-+		
-+		$this->setColumnsToDisplay($columnsToDisplay);
- 		$this->dataTable->filter('ColumnCallbackReplace', array('avg_time_on_site', create_function('$averageTimeOnSite', 'return Piwik::getPrettyTimeFromSeconds($averageTimeOnSite);')));
- 	}
- }
 Index: core/Piwik.php
 ===================================================================
---- core/Piwik.php	(revision 4152)
+--- core/Piwik.php	(revision 4837)
 +++ core/Piwik.php	(working copy)
-@@ -335,7 +335,7 @@
+@@ -383,7 +383,7 @@
  				}
  			}
  		}
@@ -149,7 +115,7 @@ Index: core/Piwik.php
  		                  . "<blockquote>$directoryList</blockquote>"
  		                  . "<p>If this doesn't work, you can try to create the directories with your FTP software, and set the CHMOD to 0777 (with your FTP software, right click on the directories, permissions).</p>"
  		                  . "<p>After applying the modifications, you can <a href='index.php'>refresh the page</a>.</p>"
-@@ -1320,7 +1320,7 @@
+@@ -1393,7 +1393,7 @@
  	 */
  	public function getLogoPath()
  	{

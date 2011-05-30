@@ -1,8 +1,8 @@
 Index: plugins/Login/templates/login.css
 ===================================================================
---- plugins/Login/templates/login.css	(revision 4152)
+--- plugins/Login/templates/login.css	(revision 4837)
 +++ plugins/Login/templates/login.css	(working copy)
-@@ -156,3 +156,10 @@
+@@ -157,3 +157,10 @@
  	margin-left:50px;
  	margin-bottom:30px;
  }
@@ -15,7 +15,7 @@ Index: plugins/Login/templates/login.css
 +}
 Index: plugins/Login/templates/header.tpl
 ===================================================================
---- plugins/Login/templates/header.tpl	(revision 4152)
+--- plugins/Login/templates/header.tpl	(revision 4837)
 +++ plugins/Login/templates/header.tpl	(working copy)
 @@ -2,7 +2,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -26,7 +26,7 @@ Index: plugins/Login/templates/header.tpl
  	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
  	<link rel="shortcut icon" href="plugins/CoreHome/templates/images/favicon.ico" />
  	<link rel="stylesheet" type="text/css" href="plugins/Login/templates/login.css" />
-@@ -53,8 +53,6 @@
+@@ -56,8 +56,6 @@
  {/if}
  {include file="default/ie6.tpl"}
  	<div id="logo">
@@ -39,7 +39,7 @@ Index: plugins/Login/templates/header.tpl
  	</div>
 Index: plugins/Login/templates/login.tpl
 ===================================================================
---- plugins/Login/templates/login.tpl	(revision 4152)
+--- plugins/Login/templates/login.tpl	(revision 4837)
 +++ plugins/Login/templates/login.tpl	(working copy)
 @@ -1,4 +1,5 @@
  {include file="Login/templates/header.tpl"}

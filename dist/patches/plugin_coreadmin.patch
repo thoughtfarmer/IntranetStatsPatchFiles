@@ -1,6 +1,6 @@
 Index: plugins/CoreAdminHome/templates/header.tpl
 ===================================================================
---- plugins/CoreAdminHome/templates/header.tpl	(revision 4152)
+--- plugins/CoreAdminHome/templates/header.tpl	(revision 4837)
 +++ plugins/CoreAdminHome/templates/header.tpl	(working copy)
 @@ -2,7 +2,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

@@ -1,20 +1,18 @@
 Index: plugins/Live/Visitor.php
 ===================================================================
---- plugins/Live/Visitor.php	(revision 4152)
+--- plugins/Live/Visitor.php	(revision 4837)
 +++ plugins/Live/Visitor.php	(working copy)
-@@ -82,7 +82,8 @@
- 			'goalName' => $this->getGoalName(),
-    			'goalRevenue' => $this->getGoalRevenue(),
- 			'goalUrl' => $this->getGoalUrl(),
--   			'goalTimePretty' => $this->getGoalTimePretty()
-+   			'goalTimePretty' => $this->getGoalTimePretty(),
+@@ -90,6 +90,7 @@
+ 			'screenTypeIcon' => $this->getScreenTypeIcon(),
+ 			'plugins' => $this->getPlugins(),
+ 			'pluginsIcons' => $this->getPluginIcons(),
 +			'liveUsername' => $this->getLiveUsername()
  		);
  	}
  
-@@ -389,4 +390,12 @@
- 		}
- 		return false;
+@@ -383,4 +384,12 @@
+ 	{
+ 		return $this->details['visit_goal_converted'];
  	}
 +
 +	function getLiveUsername()
@@ -27,10 +25,10 @@ Index: plugins/Live/Visitor.php
  }
 Index: plugins/Live/templates/visitorLog.tpl
 ===================================================================
---- plugins/Live/templates/visitorLog.tpl	(revision 4152)
+--- plugins/Live/templates/visitorLog.tpl	(revision 4837)
 +++ plugins/Live/templates/visitorLog.tpl	(working copy)
-@@ -54,7 +54,8 @@
- 						<br/><acronym title="{'CustomVariables_CustomVariables'|translate} (index {$id})">{$customVariable.name}</acronym>: {$customVariable.value}
+@@ -56,7 +56,8 @@
+ 						<br/><acronym title="{'CustomVariables_CustomVariables'|translate} (index {$id})">{$customVariable.$name}</acronym>: {$customVariable.$value}
  					{/foreach}
  				{/if}
 -				
@@ -41,14 +39,13 @@ Index: plugins/Live/templates/visitorLog.tpl
  		&nbsp;<img src="{$visitor.columns.countryFlag}" title="{$visitor.columns.country}, Provider {$visitor.columns.provider}" />
 Index: plugins/Live/templates/lastVisits.tpl
 ===================================================================
---- plugins/Live/templates/lastVisits.tpl	(revision 4152)
+--- plugins/Live/templates/lastVisits.tpl	(revision 4837)
 +++ plugins/Live/templates/lastVisits.tpl	(working copy)
-@@ -8,8 +8,7 @@
- 				&nbsp;<img src="{$visitor.browserIcon}" title="{$visitor.browser}, {'UserSettings_Plugins'|translate}: {$visitor.plugins}" />
- 				&nbsp;<img src="{$visitor.operatingSystemIcon}" title="{$visitor.operatingSystem}, {$visitor.resolution}" />
- 				&nbsp;{if $visitor.isVisitorGoalConverted}<img src="{$visitor.goalIcon}" title="{'Goals_GoalConversion'|translate} ({$visitor.goalType})" />{/if}
--				{if $visitor.isVisitorReturning}&nbsp;<img src="plugins/Live/templates/images/returningVisitor.gif" title="Returning Visitor" />{/if}
--				{if $visitor.ip}IP: {$visitor.ip}{/if}
+@@ -14,7 +14,7 @@
+ 				<span class='hash'>#</span>{$visitor.goalConversions}
+ 				</span>{/if}
+ 				{if $visitor.visitorType=='returning'}&nbsp;<img src="plugins/Live/templates/images/returningVisitor.gif" title="{'General_ReturningVisitor'|translate}" />{/if}
+-				{if $visitor.visitIp}- <span title="{if !empty($visitor.visitorId)}{'General_VisitorID'|translate}: {$visitor.visitorId}{/if}">IP: {$visitor.visitIp}</span>{/if}
 +				&nbsp;{$visitor.liveUsername}
  			</div>
  			<!--<div class="settings"></div>-->

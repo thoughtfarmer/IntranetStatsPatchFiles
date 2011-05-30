@@ -1,6 +1,6 @@
 Index: plugins/CoreUpdater/templates/header.tpl
 ===================================================================
---- plugins/CoreUpdater/templates/header.tpl	(revision 4152)
+--- plugins/CoreUpdater/templates/header.tpl	(revision 4837)
 +++ plugins/CoreUpdater/templates/header.tpl	(working copy)
 @@ -2,7 +2,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -11,9 +11,9 @@ Index: plugins/CoreUpdater/templates/header.tpl
  	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
  	<link rel="shortcut icon" href="plugins/CoreHome/templates/images/favicon.ico" />
  
-@@ -29,4 +29,4 @@
+@@ -32,4 +32,4 @@
  </head>
  <body>
  <div id="content">
--	<div id="title"><span id="h1">Piwik </span><span id="subh1"> # {'General_OpenSourceWebAnalytics'|translate}</span></div>
-+	<div id="title"><span id="h1">Intranet Statistics</span></div>
+-	<div id="title"><img title='Piwik' src='themes/default/images/logo-header.png' style='margin-left:10px'><span id="subh1"> # {'General_OpenSourceWebAnalytics'|translate}</span></div>
++	 <div id="title"><span id="h1">Intranet Statistics</span></div>

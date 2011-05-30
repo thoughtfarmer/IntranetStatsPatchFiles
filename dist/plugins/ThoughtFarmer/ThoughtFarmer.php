@@ -104,6 +104,8 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 		// first we generate data for main table
 
 		// get basic information about the user - number of visits, hits, searches
+
+		/* using insted a faster query suggested by Michael Olund
 		$query = "SELECT
 				t1.thoughtfarmer_username as label,
 				COUNT(DISTINCT t1.idvisit) as nb_visits,
@@ -117,9 +119,50 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 				 	AND t1.idsite = ?
 					AND thoughtfarmer_username is not null
 			    GROUP BY t1.`thoughtfarmer_username` ORDER BY nb_visits DESC";
+		*/
+		
+		$query = "SELECT t1.label,
+			  t1.nb_visits,
+			  t1.nb_searches,
+			  t2.nb_hits
+			FROM
+			(
+			SELECT
+			    t1.thoughtfarmer_username as label,
+			    COUNT(DISTINCT t1.idvisit) as nb_visits,
+			    COUNT(DISTINCT t2.search_phrase) as nb_searches
+			FROM `".Piwik_Common::prefixTable('log_visit')."` as t1
+			LEFT JOIN `".Piwik_Common::prefixTable('thoughtfarmer_search')."` as t2
+			    ON t2.idvisit = t1.idvisit
+			WHERE t1.visit_last_action_time >= ?
+			            AND t1.visit_last_action_time <= ?
+			            AND t1.idsite = ?
+			            AND t1.thoughtfarmer_username is not null
+			GROUP BY t1.`thoughtfarmer_username`
+			) t1
+
+			INNER JOIN
+
+			(
+			SELECT
+			    t1.thoughtfarmer_username as label,
+			    COUNT(DISTINCT t3.idlink_va) as nb_hits
+			FROM `".Piwik_Common::prefixTable('log_visit')."` as t1
+			LEFT JOIN `".Piwik_Common::prefixTable('log_link_visit_action')."` as t3
+			    ON t3.idvisit = t1.idvisit
+			WHERE t1.visit_last_action_time >= ?
+			            AND t1.visit_last_action_time <= ?
+			            AND t1.idsite = ?
+			            AND t1.thoughtfarmer_username is not null
+			GROUP BY t1.`thoughtfarmer_username`
+			) t2
+
+			ON t1.label = t2.label
+			ORDER BY t1.nb_visits DESC;";
 
 		$results = Zend_Registry::get('db')->fetchAll($query,
-			array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite)
+			array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite,
+				   $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite )
 			);
 
 		// get page creates, edits and comments

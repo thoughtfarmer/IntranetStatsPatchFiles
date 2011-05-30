@@ -1,6 +1,6 @@
 Index: plugins/CoreHome/templates/logo.tpl
 ===================================================================
---- plugins/CoreHome/templates/logo.tpl	(revision 4152)
+--- plugins/CoreHome/templates/logo.tpl	(revision 4837)
 +++ plugins/CoreHome/templates/logo.tpl	(working copy)
 @@ -1,9 +1,4 @@
  <span id="logo">
@@ -15,7 +15,7 @@ Index: plugins/CoreHome/templates/logo.tpl
  </span>
 Index: plugins/CoreHome/templates/header.tpl
 ===================================================================
---- plugins/CoreHome/templates/header.tpl	(revision 4152)
+--- plugins/CoreHome/templates/header.tpl	(revision 4837)
 +++ plugins/CoreHome/templates/header.tpl	(working copy)
 @@ -2,7 +2,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

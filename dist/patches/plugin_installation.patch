@@ -1,6 +1,6 @@
 Index: plugins/Installation/templates/structure.tpl
 ===================================================================
---- plugins/Installation/templates/structure.tpl	(revision 4152)
+--- plugins/Installation/templates/structure.tpl	(revision 4837)
 +++ plugins/Installation/templates/structure.tpl	(working copy)
 @@ -2,7 +2,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -11,7 +11,7 @@ Index: plugins/Installation/templates/structure.tpl
  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
  
  <link rel="stylesheet" type="text/css" href="themes/default/common.css" />
-@@ -209,7 +209,7 @@
+@@ -212,7 +212,7 @@
  <div id="main">
  	<div id="content">
  		<div id="logo">

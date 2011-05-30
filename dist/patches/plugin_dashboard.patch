@@ -1,15 +1,16 @@
 Index: plugins/Dashboard/Controller.php
 ===================================================================
---- plugins/Dashboard/Controller.php	(revision 4152)
+--- plugins/Dashboard/Controller.php	(revision 4837)
 +++ plugins/Dashboard/Controller.php	(working copy)
-@@ -178,24 +178,20 @@
+@@ -178,25 +178,22 @@
+ 	
  	protected function getDefaultLayout()
  	{
- 		$defaultLayout = '[
+-		$defaultLayout = '[
 -    		[
 -    			{"uniqueId":"widgetVisitsSummarygetEvolutionGraphcolumnsArray","parameters":{"module":"VisitsSummary","action":"getEvolutionGraph","columns":"nb_visits"}},
+-    			{"uniqueId":"widgetLivewidget","parameters":{"module":"Live","action":"widget"}},
 -    			{"uniqueId":"widgetVisitorInterestgetNumberOfVisitsPerVisitDuration","parameters":{"module":"VisitorInterest","action":"getNumberOfVisitsPerVisitDuration"}},
--    			{"uniqueId":"widgetUserSettingsgetBrowser","parameters":{"module":"UserSettings","action":"getBrowser"}},
 -    			{"uniqueId":"widgetExampleFeedburnerfeedburner","parameters":{"module":"ExampleFeedburner","action":"feedburner"}}
 -    		],
 -    		[
@@ -18,26 +19,28 @@ Index: plugins/Dashboard/Controller.php
 -    		],
 -    		[
 -    			{"uniqueId":"widgetUserCountryMapworldMap","parameters":{"module":"UserCountryMap","action":"worldMap"}},
--    			{"uniqueId":"widgetLivewidget","parameters":{"module":"Live","action":"widget"}},
+-    			{"uniqueId":"widgetUserSettingsgetBrowser","parameters":{"module":"UserSettings","action":"getBrowser"}},
 -    			{"uniqueId":"widgetReferersgetSearchEngines","parameters":{"module":"Referers","action":"getSearchEngines"}},
 -    			{"uniqueId":"widgetVisitTimegetVisitInformationPerServerTime","parameters":{"module":"VisitTime","action":"getVisitInformationPerServerTime"}},
 -    			{"uniqueId":"widgetExampleRssWidgetrssPiwik","parameters":{"module":"ExampleRssWidget","action":"rssPiwik"}}
 -    		]
 -    	]';
-+			[
-+				{"uniqueId":"widgetThoughtFarmergetUserActivity","parameters":{"module":"ThoughtFarmer","action":"getUserActivity","viewDataTable":"tableAllColumns"}},
-+				{"uniqueId":"widgetThoughtFarmergetPageHierarchy","parameters":{"module":"ThoughtFarmer","action":"getPageHierarchy"}},
-+				{"uniqueId":"widgetUserSettingsgetBrowser","parameters":{"module":"UserSettings","action":"getBrowser","viewDataTable":"graphPie"}}
-+			],
-+			[
-+				{"uniqueId":"widgetThoughtFarmergetSearches","parameters":{"module":"ThoughtFarmer","action":"getSearches"}},
-+				{"uniqueId":"widgetVisitTimegetVisitInformationPerServerTime","parameters":{"module":"VisitTime","action":"getVisitInformationPerServerTime"}},
-+				{"uniqueId":"widgetVisitsSummarygetEvolutionGraphcolumnsArray","parameters":{"module":"VisitsSummary","action":"getEvolutionGraph","columns":["nb_visits"]}}
-+			],
-+			[
-+				{"uniqueId":"widgetLivewidget","parameters":{"module":"Live","action":"widget"}}
-+			]
-+		]';    		
++                $defaultLayout = '[
++                        [
++                                {"uniqueId":"widgetThoughtFarmergetUserActivity","parameters":{"module":"ThoughtFarmer","action":"getUserActivity","viewDataTable":"tableAllColumns"}},
++                                {"uniqueId":"widgetThoughtFarmergetPageHierarchy","parameters":{"module":"ThoughtFarmer","action":"getPageHierarchy"}},
++                                {"uniqueId":"widgetUserSettingsgetBrowser","parameters":{"module":"UserSettings","action":"getBrowser","viewDataTable":"graphPie"}}
++                        ],
++                        [
++                                {"uniqueId":"widgetThoughtFarmergetSearches","parameters":{"module":"ThoughtFarmer","action":"getSearches"}},
++                                {"uniqueId":"widgetVisitTimegetVisitInformationPerServerTime","parameters":{"module":"VisitTime","action":"getVisitInformationPerServerTime"}},
++                                {"uniqueId":"widgetVisitsSummarygetEvolutionGraphcolumnsArray","parameters":{"module":"VisitsSummary","action":"getEvolutionGraph","columns":["nb_visits"]}}
++                        ],
++                        [
++                                {"uniqueId":"widgetLivewidget","parameters":{"module":"Live","action":"widget"}}
++                        ]
++                ]';
++
  		$defaultLayout = $this->removeDisabledPluginFromLayout($defaultLayout);
  		return $defaultLayout;
  	}

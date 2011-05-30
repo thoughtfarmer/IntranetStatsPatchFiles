@@ -1,8 +1,8 @@
 Index: plugins/SitesManager/API.php
 ===================================================================
---- plugins/SitesManager/API.php	(revision 4152)
+--- plugins/SitesManager/API.php	(revision 4837)
 +++ plugins/SitesManager/API.php	(working copy)
-@@ -381,6 +381,22 @@
+@@ -413,6 +413,22 @@
  		return (int)$idSite;
  	}
  	
@@ -24,4 +24,4 @@ Index: plugins/SitesManager/API.php
 +	
  	private function postUpdateWebsite($idSite)
  	{
- 		Piwik_Common::regenerateCacheWebsiteAttributes($idSite);	
+ 		Piwik_Site::clearCache();
