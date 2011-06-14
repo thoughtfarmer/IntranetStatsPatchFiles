@@ -27,12 +27,6 @@ done
 # run scripts
 php ../scripts/updateTranslation.php
 
-# temporary 1.2.1 patches 
-if [ $VERSION = "1.2.1" ]
-then
-	cp ../patches/1.2.1-core-patches/API.php.TFSTAT-35 plugins/Live/API.php
-fi
-
 # build release
 cd ..
 rm -rf $DISTNAME-$VERSION.tgz
