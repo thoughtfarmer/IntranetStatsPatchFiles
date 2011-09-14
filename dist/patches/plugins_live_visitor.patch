@@ -1,0 +1,23 @@
+--- plugins/Live/Visitor.php	(revision 5170)
++++ plugins/Live/Visitor.php	(working copy)
+@@ -96,6 +96,7 @@
+ 			'screenTypeIcon' => $this->getScreenTypeIcon(),
+ 			'plugins' => $this->getPlugins(),
+ 			'pluginsIcons' => $this->getPluginIcons(),
++			'liveUsername' => $this->getLiveUsername()
+ 		);
+ 	}
+ 
+@@ -436,4 +437,12 @@
+ 	{
+ 		return $this->details['visit_goal_converted'];
+ 	}
++
++	function getLiveUsername()
++	{
++		if(isset($this->details['thoughtfarmer_username'])){
++			return $this->details['thoughtfarmer_username'];
++		}
++		return false;
++	}
+ }

@@ -1,0 +1,11 @@
+--- config/global.ini.php	(revision 5170)
++++ config/global.ini.php	(working copy)
+@@ -450,6 +450,8 @@
+ Plugins[] 		= UserCountryMap
+ Plugins[] 		= Live
+ Plugins[]		= CustomVariables
++Plugins[]		= ThoughtFarmer
++Plugins[]		= ThoughtFarmerUser
+ Plugins[]		= PrivacyManager
+ 
+ [PluginsInstalled]

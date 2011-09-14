@@ -1,0 +1,9 @@
+--- D:/Projects/IntranetStatistics/git-src/dist/intranetstatistics-svn/plugins/CoreHome/templates/logo.tpl	Thu May 26 15:16:48 2011
++++ D:/Projects/IntranetStatistics/git-src/dist/intranetstatistics/plugins/CoreHome/templates/logo.tpl	Wed Sep 14 14:41:50 2011
+@@ -1,5 +1,4 @@
+ <span id="logo">
+-<a href="index.php" title="{if $isCustomLogo}{'General_PoweredBy'|translate} {/if}Piwik # {'General_OpenSourceWebAnalytics'|translate}" style="text-decoration: none;">
+-	<img src='{$logoHeader}' alt="{if $isCustomLogo}{'General_PoweredBy'|translate} {/if}Piwik" style='margin-left:10px' height='50px'/>
++<a href="index.php" title="Intranet Statistics" style="text-decoration: none;">
+ </a>
+ </span>

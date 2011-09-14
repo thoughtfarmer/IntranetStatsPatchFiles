@@ -1,0 +1,13 @@
+--- plugins/Login/templates/login.css	(revision 5170)
++++ plugins/Login/templates/login.css	(working copy)
+@@ -160,3 +160,10 @@
+ 	margin-left:50px;
+ 	margin-bottom:30px;
+ }
++
++#logo a{
++	display: block;
++	background: url(/themes/logo.png) no-repeat 0 0;
++	width: 315px;
++	height: 57px;
++}

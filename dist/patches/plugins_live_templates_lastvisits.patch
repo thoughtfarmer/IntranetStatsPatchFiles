@@ -1,0 +1,11 @@
+--- plugins/Live/templates/lastVisits.tpl	(revision 5170)
++++ plugins/Live/templates/lastVisits.tpl	(working copy)
+@@ -17,7 +17,7 @@
+ 				{/if}
+ 				</span>{/if}
+ 				{if $visitor.visitorTypeIcon}&nbsp;- <img src="{$visitor.visitorTypeIcon}" title="{'General_ReturningVisitor'|translate}" />{/if}
+-				{if $visitor.visitIp}- <span title="{if !empty($visitor.visitorId)}{'General_VisitorID'|translate}: {$visitor.visitorId}{/if}">IP: {$visitor.visitIp}</span>{/if}
++				&nbsp;{$visitor.liveUsername}				
+ 			</div>
+ 			<!--<div class="settings"></div>-->
+ 			<div class="referer">

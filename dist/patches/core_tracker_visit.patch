@@ -1,0 +1,19 @@
+--- core/Tracker/Visit.php	(revision 5170)
++++ core/Tracker/Visit.php	(working copy)
+@@ -1196,7 +1196,15 @@
+ 	 */
+ 	protected function getConfigHash( $os, $browserName, $browserVersion, $resolution, $plugin_Flash, $plugin_Java, $plugin_Director, $plugin_Quicktime, $plugin_RealPlayer, $plugin_PDF, $plugin_WindowsMedia, $plugin_Gears, $plugin_Silverlight, $plugin_Cookie, $ip, $browserLang)
+ 	{
+-		$hash = md5( $os . $browserName . $browserVersion . $plugin_Flash . $plugin_Java . $plugin_Director . $plugin_Quicktime . $plugin_RealPlayer . $plugin_PDF . $plugin_WindowsMedia . $plugin_Gears . $plugin_Silverlight . $plugin_Cookie . $ip . $browserLang, $raw_output = true );
++		$thoughtFarmerUsername = "";
++		if( isset($_GET['data']) && ($customVariables = json_decode(stripslashes($_GET['data']),true)) !== null )
++		{
++			if( isset($customVariables['ThoughtFarmer_username']) )
++			{
++				$thoughtFarmerUsername = $customVariables['ThoughtFarmer_username'];		
++			}
++		}	
++		$hash = md5($thoughtFarmerUsername . $os . $browserName . $browserVersion . $plugin_Flash . $plugin_Java . $plugin_Director . $plugin_Quicktime . $plugin_RealPlayer . $plugin_PDF . $plugin_WindowsMedia . $plugin_Gears . $plugin_Silverlight . $plugin_Cookie . $ip . $browserLang, $raw_output = true );
+ 		return substr( $hash, 0, Piwik_Tracker::LENGTH_BINARY_ID);
+ 	}
+ 
