@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="1.4"
+VERSION="1.5.1"
 DISTNAME="intranetstatistics"
 
 WORKING_DIR=`dirname $0`
@@ -13,7 +13,7 @@ svn export "http://dev.piwik.org/svn/tags/$VERSION" $DISTNAME
 # copy files
 cp -R plugins/ThoughtFarmer $DISTNAME/plugins
 cp -R plugins/ThoughtFarmerUser $DISTNAME/plugins
-cp -R images/* $DISTNAME/themes/default/images
+cp -R themes/logo.png $DISTNAME/themes/
 cp -R plugins/Login/templates/* $DISTNAME/plugins/Login/templates
 cp -R libs/jquery/* $DISTNAME/libs/jquery
 
