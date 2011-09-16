@@ -1,5 +1,14 @@
 --- themes/default/common.css	(revision 5170)
 +++ themes/default/common.css	(working copy)
+@@ -167,7 +167,7 @@
+ 	position: absolute;
+ 	right:4px;
+ 	overflow:hidden; 
+-	display:block; 
++	display:none; 
+ 	height:20px;
+ 	line-height:20px;
+ 	padding:5px 8px 5px 38px;
 @@ -217,7 +217,13 @@
  	height:40px;
  }

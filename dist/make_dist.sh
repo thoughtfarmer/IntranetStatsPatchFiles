@@ -16,6 +16,7 @@ cp -R plugins/ThoughtFarmerUser $DISTNAME/plugins
 cp -R themes/logo.png $DISTNAME/themes/
 cp -R plugins/Login/templates/* $DISTNAME/plugins/Login/templates
 cp -R libs/jquery/* $DISTNAME/libs/jquery
+cp -R plugins/GeoIP $DISTNAME/plugins
 
 # apply patches
 cd $DISTNAME
