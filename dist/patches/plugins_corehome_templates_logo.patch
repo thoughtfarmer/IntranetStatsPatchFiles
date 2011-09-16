@@ -1,5 +1,5 @@
---- D:/Projects/IntranetStatistics/git-src/dist/intranetstatistics-svn/plugins/CoreHome/templates/logo.tpl	Thu May 26 15:16:48 2011
-+++ D:/Projects/IntranetStatistics/git-src/dist/intranetstatistics/plugins/CoreHome/templates/logo.tpl	Wed Sep 14 14:41:50 2011
+--- plugins/CoreHome/templates/logo.tpl	(revision 5170)
++++ plugins/CoreHome/templates/logo.tpl	(working copy)
 @@ -1,5 +1,4 @@
  <span id="logo">
 -<a href="index.php" title="{if $isCustomLogo}{'General_PoweredBy'|translate} {/if}Piwik # {'General_OpenSourceWebAnalytics'|translate}" style="text-decoration: none;">
