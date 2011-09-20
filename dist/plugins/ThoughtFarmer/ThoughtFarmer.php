@@ -72,7 +72,7 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 	{
 	    $visitorInfo =& $notification->getNotificationObject();
 
-		if( isset($_GET['data']) && ($customVariables = json_decode(stripslashes($_GET['data']),true)) !== null )
+		if( isset($_GET['data']) && ($customVariables = json_decode($_GET['data'],true)) !== null )
 		{
 			if( isset($customVariables['ThoughtFarmer_username']) )
 			{

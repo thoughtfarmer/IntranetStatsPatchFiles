@@ -187,7 +187,7 @@ class Piwik_ThoughtFarmer_Action extends Piwik_Tracker_Action
 		$recordAction = true;
 
 		// check if there are custom Piwik var passed
-		if( isset($_GET['data']) && ($customVariables = json_decode(stripslashes($_GET['data']),true)) !== null )
+		if( isset($_GET['data']) && ($customVariables = json_decode($_GET['data'],true)) !== null )
 		{
 			if( isset($customVariables['ThoughtFarmer_action']) )
 			{
