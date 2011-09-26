@@ -41,7 +41,15 @@ class Piwik_ThoughtFarmer_Controller extends Piwik_Controller
 	 */
 	public function getUserActivity($fetch = false)
 	{
-		$view = Piwik_ViewDataTable::factory();
+		if(Piwik_Common::getRequestVar('viewDataTable', '') == 'tableAllColumns')
+		{
+			$view = Piwik_ViewDataTable::factory('table', true);
+		}
+		else 
+		{
+			$view = Piwik_ViewDataTable::factory();
+		}
+		
 		$view->init(  	$this->pluginName,
 						__FUNCTION__,
 						'ThoughtFarmer.getUserActivity',
@@ -62,7 +70,15 @@ class Piwik_ThoughtFarmer_Controller extends Piwik_Controller
 
 	public function getUserActivitySubtable($fetch = false)
 	{
-		$view = Piwik_ViewDataTable::factory();
+		if(Piwik_Common::getRequestVar('viewDataTable', '') == 'tableAllColumns')
+		{
+			$view = Piwik_ViewDataTable::factory('table', true);
+		}
+		else 
+		{
+			$view = Piwik_ViewDataTable::factory();
+		}
+		
 		$view->init(  	$this->pluginName,
 						__FUNCTION__,
 						'ThoughtFarmer.getUserActivity',

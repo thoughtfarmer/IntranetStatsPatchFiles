@@ -25,7 +25,7 @@
 -    	]';
 +                $defaultLayout = '[
 +                        [
-+                                {"uniqueId":"widgetThoughtFarmergetUserActivity","parameters":{"module":"ThoughtFarmer","action":"getUserActivity","viewDataTable":"tableAllColumns"}},
++                                {"uniqueId":"widgetThoughtFarmergetUserActivity","parameters":{"module":"ThoughtFarmer","action":"getUserActivity","viewDataTable":"table"}},
 +                                {"uniqueId":"widgetThoughtFarmergetPageHierarchy","parameters":{"module":"ThoughtFarmer","action":"getPageHierarchy"}},
 +                                {"uniqueId":"widgetUserSettingsgetBrowser","parameters":{"module":"UserSettings","action":"getBrowser","viewDataTable":"graphPie"}}
 +                        ],
