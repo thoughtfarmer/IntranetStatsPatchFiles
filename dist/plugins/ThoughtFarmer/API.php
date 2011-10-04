@@ -70,7 +70,7 @@ class Piwik_ThoughtFarmer_API
 		Piwik::checkUserHasViewAccess($idSite);
 
 		$dataTable = $this->getDataTable('thoughtfarmer_search', $idSite, $period, $date, $expanded, $idSubtable );
-		$dataTable->filter('Sort', array('nb_visits', 'desc', $naturalSort = false, $expanded));
+		$dataTable->filter('Sort', array('nb_searches', 'desc', $naturalSort = false, $expanded));
 
 		return $dataTable;
 	}
