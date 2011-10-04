@@ -43,7 +43,6 @@ class Piwik_ThoughtFarmer_API
 		{
 			$dataTable = $archive->getDataTable($name, $idSubtable);
 		}
-		$dataTable->filter('Sort', array(Piwik_Archive::INDEX_NB_VISITS, 'desc', $naturalSort = false, $expanded));
 
 		if( $summarize )
 		{
@@ -61,6 +60,7 @@ class Piwik_ThoughtFarmer_API
 		Piwik::checkUserHasViewAccess($idSite);
 
 		$dataTable = $this->getDataTable('thoughtfarmer_user', $idSite, $period, $date, $expanded, $idSubtable );
+		$dataTable->filter('Sort', array('nb_hits', 'desc', $naturalSort = false, $expanded));
 		
 		return $dataTable;
 	}
@@ -70,6 +70,7 @@ class Piwik_ThoughtFarmer_API
 		Piwik::checkUserHasViewAccess($idSite);
 
 		$dataTable = $this->getDataTable('thoughtfarmer_search', $idSite, $period, $date, $expanded, $idSubtable );
+		$dataTable->filter('Sort', array('nb_visits', 'desc', $naturalSort = false, $expanded));
 
 		return $dataTable;
 	}
@@ -79,6 +80,7 @@ class Piwik_ThoughtFarmer_API
 		Piwik::checkUserHasViewAccess($idSite);
 
 		$dataTable = $this->getDataTable('thoughtfarmer_page_hierarchy', $idSite, $period, $date, $expanded, $idSubtable );
+		$dataTable->filter('Sort', array('nb_hits', 'desc', $naturalSort = false, $expanded));
 
 		return $dataTable;
 	}
@@ -88,6 +90,7 @@ class Piwik_ThoughtFarmer_API
 		Piwik::checkUserHasViewAccess($idSite);
 
 		$dataTable = $this->getDataTable('thoughtfarmer_page_title', $idSite, $period, $date, $expanded, $idSubtable );
+		$dataTable->filter('Sort', array('nb_hits', 'desc', $naturalSort = false, $expanded));
 
 		return $dataTable;
 	}
