@@ -198,7 +198,7 @@ class Piwik_ThoughtFarmer_Action extends Piwik_Tracker_Action
 
 			if( isset($customVariables['ThoughtFarmer_search']) )
 			{
-				$searchPhrase = $customVariables['ThoughtFarmer_search'];
+				$searchPhrase = strtolower(urldecode($customVariables['ThoughtFarmer_search']));
 
 				printDebug("ThoughtFarmer::recording search");
 				
