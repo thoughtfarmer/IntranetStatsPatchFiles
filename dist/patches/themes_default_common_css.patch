@@ -9,3 +9,17 @@
  	height:20px;
  	line-height:20px;
  	padding:5px 8px 5px 38px;
+@@ -217,6 +217,13 @@
+ 	height:40px;
+ }
+ 
++#logo a {
++ display: block;
++ background: url(../../themes/logo.png) no-repeat 0 0;
++ width: 315px;
++ height: 57px;
++}
++
+ /*sites_autocomplete*/
+ .sites_autocomplete{ 
+ 	position:absolute; 
