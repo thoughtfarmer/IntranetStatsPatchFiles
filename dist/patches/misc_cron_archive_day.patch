@@ -1,5 +1,5 @@
---- misc/cron/archive-day-week.sh	(revision 5170)
-+++ misc/cron/archive-day-week.sh	(working copy)
+--- misc/cron/archive-day.sh	(revision 5170)
++++ misc/cron/archive-day.sh	(working copy)
 @@ -1,4 +1,4 @@
 -#!/bin/sh -e
 +#!/bin/sh +e
@@ -11,7 +11,7 @@
    TEST_IS_NUMERIC=`echo $idsite | egrep '^[0-9]+$'`
    if test -n "$TEST_IS_NUMERIC"; then
 -    for period in day week month year; do
-+    for period in day week; do
++    for period in day; do
        echo ""
        echo "Archiving period = $period for idsite = $idsite..."
        CMD="$PHP_BIN -q $PIWIK_PATH -- module=API&method=VisitsSummary.getVisits&idSite=$idsite&period=$period&date=last52&format=xml&token_auth=$TOKEN_AUTH"
