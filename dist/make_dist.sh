@@ -19,6 +19,7 @@ cp -R libs/jquery/* $DISTNAME/libs/jquery
 cp $DISTNAME/misc/cron/archive.sh $DISTNAME/misc/cron/archive-day.sh
 cp $DISTNAME/misc/cron/archive.sh $DISTNAME/misc/cron/archive-week-month-year.sh
 rm $DISTNAME/misc/cron/archive.sh
+mkdir $DISTNAME/tmp/tcpdf
 
 # apply patches
 cd $DISTNAME
