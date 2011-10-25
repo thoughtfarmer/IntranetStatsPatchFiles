@@ -105,22 +105,6 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 
 		// get basic information about the user - number of visits, hits, searches
 
-		/* using insted a faster query suggested by Michael Olund
-		$query = "SELECT
-				t1.thoughtfarmer_username as label,
-				COUNT(DISTINCT t1.idvisit) as nb_visits,
-				COUNT(DISTINCT t2.search_phrase) as nb_searches,
-				COUNT(DISTINCT t3.idlink_va) as nb_hits
-			    FROM `".Piwik_Common::prefixTable('log_visit')."` as t1
-					LEFT JOIN `".Piwik_Common::prefixTable('thoughtfarmer_search')."` as t2 USING(idvisit)
-					LEFT JOIN `".Piwik_Common::prefixTable('log_link_visit_action')."` as t3 USING(idvisit)
-			    WHERE visit_last_action_time >= ?
-					AND visit_last_action_time <= ?
-				 	AND t1.idsite = ?
-					AND thoughtfarmer_username is not null
-			    GROUP BY t1.`thoughtfarmer_username` ORDER BY nb_visits DESC";
-		*/
-		
 		$query = "SELECT t1.label,
 			  t1.nb_visits,
 			  t1.nb_searches,
