@@ -287,7 +287,7 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 			    WHERE visit_last_action_time >= ?
 					AND visit_last_action_time <= ?
 				 	AND t1.idsite = ?
-			    GROUP BY t2.`search_phrase` ORDER BY nb_visits DESC";
+			    GROUP BY t2.`search_phrase` ORDER BY nb_searches DESC";
 
 
 		$results = Zend_Registry::get('db')->fetchAll($query,
@@ -464,15 +464,10 @@ class Piwik_ThoughtFarmer extends Piwik_Plugin
 	function archivePeriod( $notification )
 	{
 		$archiveProcessing = $notification->getNotificationObject();
-
-		$dataTableToSum = array(
-			'thoughtfarmer_search',
-			'thoughtfarmer_user',
-			'thoughtfarmer_page_hierarchy',
-			'thoughtfarmer_page_title'
-		);
-
-		$archiveProcessing->archiveDataTable($dataTableToSum);
+		$archiveProcessing->archiveDataTable(array('thoughtfarmer_page_hierarchy'));		
+		$archiveProcessing->archiveDataTable(array('thoughtfarmer_page_title'), null, 500, null, 'nb_hits');
+		$archiveProcessing->archiveDataTable(array('thoughtfarmer_user'));		
+		$archiveProcessing->archiveDataTable(array('thoughtfarmer_search'), null, 200, null, 'nb_searches');
 	}
 
 	static public function recordSearch($idvisit, $searchPhrase)
