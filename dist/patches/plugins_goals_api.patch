@@ -1,6 +1,6 @@
---- plugins/Goals/API.php	(revision 5170)
-+++ plugins/Goals/API.php	(working copy)
-@@ -91,7 +91,7 @@
+--- plugins/Goals/API.php
++++ plugins/Goals/API.php
+@@ -95,7 +95,7 @@
  	 */
  	public function addGoal( $idSite, $name, $matchAttribute, $pattern, $patternType, $caseSensitive = false, $revenue = false, $allowMultipleConversionsPerVisit = false)
  	{
@@ -9,7 +9,7 @@
  		$this->checkPatternIsValid($patternType, $pattern);
  		$name = $this->checkName($name);
  		$pattern = $this->checkPattern($pattern);
-@@ -131,7 +131,7 @@
+@@ -135,7 +135,7 @@
  	 */
  	public function updateGoal( $idSite, $idGoal, $name, $matchAttribute, $pattern, $patternType, $caseSensitive = false, $revenue = false, $allowMultipleConversionsPerVisit = false)
  	{
@@ -18,7 +18,7 @@
  		$name = $this->checkName($name);
  		$pattern = $this->checkPattern($pattern);
  		$this->checkPatternIsValid($patternType, $pattern);
-@@ -179,7 +179,7 @@
+@@ -183,7 +183,7 @@
  	 */
  	public function deleteGoal( $idSite, $idGoal )
  	{

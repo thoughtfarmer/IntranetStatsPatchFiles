@@ -1,6 +1,6 @@
---- plugins/SitesManager/API.php	(revision 5170)
-+++ plugins/SitesManager/API.php	(working copy)
-@@ -402,6 +402,8 @@
+--- plugins/SitesManager/API.php
++++ plugins/SitesManager/API.php
+@@ -435,6 +435,8 @@
  			$bind['group'] = "";
  		}
  		
@@ -9,7 +9,7 @@
  		$db->insert(Piwik_Common::prefixTable("site"), $bind);
  									
  		$idSite = $db->lastInsertId();
-@@ -415,6 +417,22 @@
+@@ -448,6 +450,22 @@
  		return (int)$idSite;
  	}
  	

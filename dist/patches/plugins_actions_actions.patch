@@ -1,6 +1,6 @@
---- plugins/Actions/Actions.php	(revision 5170)
-+++ plugins/Actions/Actions.php	(working copy)
-@@ -200,18 +200,16 @@
+--- plugins/Actions/Actions.php
++++ plugins/Actions/Actions.php
+@@ -228,18 +228,16 @@
  		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPagesEntry', 'Actions', 'getEntryPageUrls');
  		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPagesExit', 'Actions', 'getExitPageUrls');
  		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPages', 'Actions', 'getPageUrls');

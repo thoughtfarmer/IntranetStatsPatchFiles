@@ -1,5 +1,5 @@
---- core/ViewDataTable.php	(revision 5170)
-+++ core/ViewDataTable.php	(working copy)
+--- core/ViewDataTable.php
++++ core/ViewDataTable.php
 @@ -160,6 +160,14 @@
  	protected $columnsToDisplay = array();
  
@@ -15,7 +15,7 @@
  	 * Variable that is used as the DIV ID in the rendered HTML
  	 *
  	 * @var string
-@@ -1048,6 +1056,19 @@
+@@ -1049,6 +1057,19 @@
  	}
  
  	/**

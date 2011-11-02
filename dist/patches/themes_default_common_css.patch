@@ -1,5 +1,5 @@
---- themes/default/common.css	(revision 5170)
-+++ themes/default/common.css	(working copy)
+--- themes/default/common.css
++++ themes/default/common.css
 @@ -167,7 +167,7 @@
  	position: absolute;
  	right:4px;
@@ -9,7 +9,7 @@
  	height:20px;
  	line-height:20px;
  	padding:5px 8px 5px 38px;
-@@ -217,6 +217,13 @@
+@@ -219,6 +219,13 @@
  	height:40px;
  }
  
