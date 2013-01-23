@@ -1,8 +1,0 @@
---- misc/cron/archive-week-month-year.sh	(revision 5170)
-+++ misc/cron/archive-week-month-year.sh	(working copy)
-@@ -1,4 +1,4 @@
--#!/bin/sh -e
-+#!/bin/sh +e
- 
- # Description
- # This cron script will automatically run Piwik archiving every hour.

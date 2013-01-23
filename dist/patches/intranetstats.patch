@@ -1,0 +1,2601 @@
+Index: config/global.ini.php
+===================================================================
+--- config/global.ini.php	(revision 7789)
++++ config/global.ini.php	(working copy)
+@@ -526,6 +526,8 @@
+ Plugins[] 		= UserCountryMap
+ Plugins[] 		= Live
+ Plugins[]		= CustomVariables
++Plugins[]		= ThoughtFarmer
++Plugins[]		= ThoughtFarmerUser
+ Plugins[]		= PrivacyManager
+ Plugins[]		= ImageGraph
+ Plugins[]		= DoNotTrack
+Index: core/Piwik.php
+===================================================================
+--- core/Piwik.php	(revision 7789)
++++ core/Piwik.php	(working copy)
+@@ -670,69 +670,6 @@
+ 		$messages = array();
+ 		$messages[] = true;
+ 
+-		// ignore dev environments
+-		if(file_exists(PIWIK_INCLUDE_PATH . '/.svn'))
+-		{
+-			$messages[] = Piwik_Translate('General_WarningFileIntegritySkipped');
+-			return $messages;
+-		}
+-
+-		$manifest = PIWIK_INCLUDE_PATH . '/config/manifest.inc.php';
+-		if(!file_exists($manifest))
+-		{
+-			$messages[] = Piwik_Translate('General_WarningFileIntegrityNoManifest');
+-			return $messages;
+-		}
+-
+-		require_once $manifest;
+-
+-		$files = Manifest::$files;
+-
+-		$hasMd5file = function_exists('md5_file');
+-		$hasMd5 = function_exists('md5');
+-		foreach($files as $path => $props)
+-		{
+-			$file = PIWIK_INCLUDE_PATH . '/' . $path;
+-
+-			if(!file_exists($file))
+-			{
+-				$messages[] = Piwik_Translate('General_ExceptionMissingFile', $file);
+-			}
+-			else if(filesize($file) != $props[0])
+-			{
+-				if(!$hasMd5 || in_array(substr($path, -4), array('.gif', '.ico', '.jpg', '.png', '.swf')))
+-				{
+-					// files that contain binary data (e.g., images) must match the file size
+-					$messages[] = Piwik_Translate('General_ExceptionFilesizeMismatch', array($file, $props[0], filesize($file)));
+-				}
+-				else
+-				{
+-					// convert end-of-line characters and re-test text files
+-					$content = @file_get_contents($file);
+-					$content = str_replace("\r\n", "\n", $content);
+-					if((strlen($content) != $props[0])
+-						|| (@md5($content) !== $props[1]))
+-					{
+-						$messages[] = Piwik_Translate('General_ExceptionFilesizeMismatch', array($file, $props[0], filesize($file)));
+-					}
+-				}
+-			}
+-			else if($hasMd5file && (@md5_file($file) !== $props[1]))
+-			{
+-				$messages[] = Piwik_Translate('General_ExceptionFileIntegrity', $file);
+-			}
+-		}
+-
+-		if(count($messages) > 1)
+-		{
+-			$messages[0] = false;
+-		}
+-
+-		if(!$hasMd5file)
+-		{
+-			$messages[] = Piwik_Translate('General_WarningFileIntegrityNoMd5file');
+-		}
+-
+ 		return $messages;
+ 	}
+ 
+Index: core/PluginsManager.php
+===================================================================
+--- core/PluginsManager.php	(revision 7789)
++++ core/PluginsManager.php	(working copy)
+@@ -133,7 +133,8 @@
+ 	 */
+ 	public function isPluginActivated( $name )
+ 	{
+-		return in_array( $name, $this->pluginsToLoad)
++		$search_array = array_map('strtolower', $this->pluginsToLoad);
++		return in_array( strtolower($name), $search_array)
+ 			|| $this->isPluginAlwaysActivated( $name );
+ 	}
+ 
+Index: core/Tracker/Action.php
+===================================================================
+--- core/Tracker/Action.php	(revision 7789)
++++ core/Tracker/Action.php	(working copy)
+@@ -49,9 +49,9 @@
+ class Piwik_Tracker_Action implements Piwik_Tracker_Action_Interface
+ {
+ 	private $request;
+-	private $idSite;
+-	private $timestamp;
+-	private $idLinkVisitAction;
++	protected $idSite;
++	protected $timestamp;
++	protected $idLinkVisitAction;
+ 	private $idActionName = false;
+ 	private $idActionUrl = false;
+ 
+@@ -631,6 +631,11 @@
+ 	{
+ 		$this->idSite = $idSite;
+ 	}
++
++	public function getIdSite()
++	{
++		return $this->idSite;
++	}
+ 	
+ 	function setTimestamp($timestamp)
+ 	{
+Index: core/Tracker/Visit.php
+===================================================================
+--- core/Tracker/Visit.php	(revision 7789)
++++ core/Tracker/Visit.php	(working copy)
+@@ -1531,8 +1531,16 @@
+ 	 */
+ 	protected function getConfigHash( $os, $browserName, $browserVersion, $resolution, $plugin_Flash, $plugin_Java, $plugin_Director, $plugin_Quicktime, $plugin_RealPlayer, $plugin_PDF, $plugin_WindowsMedia, $plugin_Gears, $plugin_Silverlight, $plugin_Cookie, $ip, $browserLang)
+ 	{
+-		$hash = md5( $os . $browserName . $browserVersion . $plugin_Flash . $plugin_Java . $plugin_Director . $plugin_Quicktime . $plugin_RealPlayer . $plugin_PDF . $plugin_WindowsMedia . $plugin_Gears . $plugin_Silverlight . $plugin_Cookie . $ip . $browserLang, $raw_output = true );
+-		return Piwik_Common::substr( $hash, 0, Piwik_Tracker::LENGTH_BINARY_ID );
++ 		$thoughtFarmerUsername = "";
++ 		if( isset($_GET['data']) && ($customVariables = json_decode($_GET['data'],true)) !== null )
++ 		{
++ 			if( isset($customVariables['ThoughtFarmer_username']) )
++ 			{
++ 				$thoughtFarmerUsername = $customVariables['ThoughtFarmer_username'];		
++ 			}
++ 		}	
++ 		$hash = md5($thoughtFarmerUsername . $os . $browserName . $browserVersion . $plugin_Flash . $plugin_Java . $plugin_Director . $plugin_Quicktime . $plugin_RealPlayer . $plugin_PDF . $plugin_WindowsMedia . $plugin_Gears . $plugin_Silverlight . $plugin_Cookie . $ip . $browserLang, $raw_output = true );
++        return Piwik_Common::substr( $hash, 0, Piwik_Tracker::LENGTH_BINARY_ID );
+ 	}
+ 
+ 	/**
+Index: core/ViewDataTable.php
+===================================================================
+--- core/ViewDataTable.php	(revision 7789)
++++ core/ViewDataTable.php	(working copy)
+@@ -160,6 +160,14 @@
+ 	protected $columnsToDisplay = array();
+ 
+ 	/**
++	 * Array of columns set to display in table
++	 *
++	 * @var array
++	 */
++	protected $tableAllColumnsToDisplay = array();
++
++
++	/**
+ 	 * Variable that is used as the DIV ID in the rendered HTML
+ 	 *
+ 	 * @var string
+@@ -1253,6 +1261,19 @@
+ 	}
+ 
+ 	/**
++	 * Overrides the columns that will be displayed in the HTML output all columns view
++	 * By default they are defined in Piwik_ViewDataTable_HtmlTable_AllColumns class
++	 */
++	public function setTableAllColumnsToDisplay( $columnsNames )
++	{
++		if(!is_array($columnsNames))
++		{
++			$columnsNames = array($columnsNames);
++		}
++		$this->tableAllColumnsToDisplay = $columnsNames;
++	}
++
++	/**
+ 	 * Returns columns names to display, in order.
+ 	 * If no columns were specified to be displayed, return all columns found in the first row.
+ 	 * @param array PHP array conversion of the data table
+Index: libs/jquery/jquery.cookie.js
+===================================================================
+--- libs/jquery/jquery.cookie.js	(revision 0)
++++ libs/jquery/jquery.cookie.js	(working copy)
+@@ -0,0 +1,96 @@
++/**
++ * Cookie plugin
++ *
++ * Copyright (c) 2006 Klaus Hartl (stilbuero.de)
++ * Dual licensed under the MIT and GPL licenses:
++ * http://www.opensource.org/licenses/mit-license.php
++ * http://www.gnu.org/licenses/gpl.html
++ *
++ */
++
++/**
++ * Create a cookie with the given name and value and other optional parameters.
++ *
++ * @example $.cookie('the_cookie', 'the_value');
++ * @desc Set the value of a cookie.
++ * @example $.cookie('the_cookie', 'the_value', { expires: 7, path: '/', domain: 'jquery.com', secure: true });
++ * @desc Create a cookie with all available options.
++ * @example $.cookie('the_cookie', 'the_value');
++ * @desc Create a session cookie.
++ * @example $.cookie('the_cookie', null);
++ * @desc Delete a cookie by passing null as value. Keep in mind that you have to use the same path and domain
++ *       used when the cookie was set.
++ *
++ * @param String name The name of the cookie.
++ * @param String value The value of the cookie.
++ * @param Object options An object literal containing key/value pairs to provide optional cookie attributes.
++ * @option Number|Date expires Either an integer specifying the expiration date from now on in days or a Date object.
++ *                             If a negative value is specified (e.g. a date in the past), the cookie will be deleted.
++ *                             If set to null or omitted, the cookie will be a session cookie and will not be retained
++ *                             when the the browser exits.
++ * @option String path The value of the path atribute of the cookie (default: path of page that created the cookie).
++ * @option String domain The value of the domain attribute of the cookie (default: domain of page that created the cookie).
++ * @option Boolean secure If true, the secure attribute of the cookie will be set and the cookie transmission will
++ *                        require a secure protocol (like HTTPS).
++ * @type undefined
++ *
++ * @name $.cookie
++ * @cat Plugins/Cookie
++ * @author Klaus Hartl/klaus.hartl@stilbuero.de
++ */
++
++/**
++ * Get the value of a cookie with the given name.
++ *
++ * @example $.cookie('the_cookie');
++ * @desc Get the value of a cookie.
++ *
++ * @param String name The name of the cookie.
++ * @return The value of the cookie.
++ * @type String
++ *
++ * @name $.cookie
++ * @cat Plugins/Cookie
++ * @author Klaus Hartl/klaus.hartl@stilbuero.de
++ */
++jQuery.cookie = function(name, value, options) {
++    if (typeof value != 'undefined') { // name and value given, set cookie
++        options = options || {};
++        if (value === null) {
++            value = '';
++            options.expires = -1;
++        }
++        var expires = '';
++        if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
++            var date;
++            if (typeof options.expires == 'number') {
++                date = new Date();
++                date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
++            } else {
++                date = options.expires;
++            }
++            expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
++        }
++        // CAUTION: Needed to parenthesize options.path and options.domain
++        // in the following expressions, otherwise they evaluate to undefined
++        // in the packed version for some reason...
++        var path = options.path ? '; path=' + (options.path) : '';
++        var domain = options.domain ? '; domain=' + (options.domain) : '';
++        var secure = options.secure ? '; secure' : '';
++        document.cookie = [name, '=', encodeURIComponent(value), expires, path, domain, secure].join('');
++    } else { // only name given, get cookie
++        var cookieValue = null;
++        if (document.cookie && document.cookie != '') {
++            var cookies = document.cookie.split(';');
++            for (var i = 0; i < cookies.length; i++) {
++                var cookie = jQuery.trim(cookies[i]);
++                // Does this cookie string begin with the name we want?
++                if (cookie.substring(0, name.length + 1) == (name + '=')) {
++                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
++                    break;
++                }
++            }
++        }
++        return cookieValue;
++    }
++};
+\ No newline at end of file
+Index: misc/cron/archive-day.sh
+===================================================================
+--- misc/cron/archive-day.sh	(revision 0)
++++ misc/cron/archive-day.sh	(working copy)
+@@ -0,0 +1,102 @@
++#!/bin/sh +e
++
++# Description
++# This cron script will automatically run Piwik archiving every hour.
++# The script will also run scheduled tasks configured within piwik using
++# the event hook 'TaskScheduler.getScheduledTasks'
++
++# It automatically fetches the Super User token_auth
++# and triggers the archiving for all websites for all periods.
++# This ensures that all reports are pre-computed and Piwik renders very fast.
++
++# Documentation
++# Please check the documentation on http://piwik.org/docs/setup-auto-archiving/
++
++# How to setup the crontab job?
++# Add the following lines in your crontab file, eg. /etc/cron.d/piwik-archive
++#---------------START CRON TAB--
++#MAILTO="youremail@example.com"
++#5 * * * * www-data /path/to/piwik/misc/cron/archive.sh > /dev/null
++#-----------------END CRON TAB--
++# When an error occurs (eg. php memory error, timeout) the error messages
++# will be sent to youremail@example.com.
++#
++# Optimization for high traffic websites
++# You may want to override the following settings in config/config.ini.php:
++# See documentation of the fields in your piwik/config/config.ini.php
++#
++# [General]
++# time_before_archive_considered_outdated = 3600
++# enable_browser_archiving_triggering = false
++#===========================================================================
++
++for TEST_PHP_BIN in php5 php php-cli php-cgi; do
++  if which $TEST_PHP_BIN >/dev/null 2>/dev/null; then
++    PHP_BIN=`which $TEST_PHP_BIN`
++    break
++  fi
++done
++if test -z $PHP_BIN; then
++  echo "php binary not found. Make sure php5 or php exists in PATH." >&2
++  exit 1
++fi
++
++act_path() {
++  local pathname="$1"
++  readlink -f "$pathname" 2>/dev/null || \
++  realpath "$pathname" 2>/dev/null || \
++  type -P "$pathname" 2>/dev/null
++}
++
++ARCHIVE=`act_path ${0}`
++PIWIK_CRON_FOLDER=`dirname ${ARCHIVE}`
++PIWIK_PATH="$PIWIK_CRON_FOLDER"/../../index.php
++PIWIK_CONFIG="$PIWIK_CRON_FOLDER"/../../config/config.ini.php
++
++PIWIK_SUPERUSER=`sed '/^\[superuser\]/,$!d;/^login[ \t]*=[ \t]*"*/!d;s///;s/"*[ \t]*$//;q' $PIWIK_CONFIG`
++PIWIK_SUPERUSER_MD5_PASSWORD=`sed '/^\[superuser\]/,$!d;/^password[ \t]*=[ \t]*"*/!d;s///;s/"*[ \t]*$//;q' $PIWIK_CONFIG`
++
++CMD_TOKEN_AUTH="$PHP_BIN -q $PIWIK_PATH -- module=API&method=UsersManager.getTokenAuth&userLogin=$PIWIK_SUPERUSER&md5Password=$PIWIK_SUPERUSER_MD5_PASSWORD&format=php&serialize=0"
++TOKEN_AUTH=`$CMD_TOKEN_AUTH`
++
++CMD_GET_ID_SITES="$PHP_BIN -q $PIWIK_PATH -- module=API&method=SitesManager.getAllSitesId&token_auth=$TOKEN_AUTH&format=csv&convertToUnicode=0"
++ID_SITES=`$CMD_GET_ID_SITES`
++
++CMD_GET_SEGMENTS_TO_ARCHIVE="$PHP_BIN -q $PIWIK_PATH -- module=API&method=CoreAdminHome.getKnownSegmentsToArchive&token_auth=$TOKEN_AUTH&format=csv&convertToUnicode=0"
++SEGMENTS_TO_ARCHIVE=`$CMD_GET_SEGMENTS_TO_ARCHIVE`
++
++echo "Starting Piwik reports archiving..."
++echo ""
++for idsite in $ID_SITES; do
++  TEST_IS_NUMERIC=`echo $idsite | egrep '^[0-9]+$'`
++  if test -n "$TEST_IS_NUMERIC"; then
++    for period in day; do
++      echo ""
++      echo "Archiving period = $period for idsite = $idsite..."
++      CMD="$PHP_BIN -q $PIWIK_PATH -- module=API&method=VisitsSummary.getVisits&idSite=$idsite&period=$period&date=last52&format=xml&token_auth=$TOKEN_AUTH"
++      $CMD
++      
++      for segment in $SEGMENTS_TO_ARCHIVE; do
++	    if test $segment != "value"; then
++      	  echo ""
++      	  echo " - Archiving for visitor segment $segment ..." 
++      	  CMD_ARCHIVE_SEGMENT="${CMD}&segment=$segment"
++      	  $CMD_ARCHIVE_SEGMENT
++      	fi
++      done
++    done
++
++    echo ""
++    echo "Archiving for idsite = $idsite done!"
++  fi
++done
++
++echo "Reports archiving finished."
++echo "---------------------------"
++echo "Starting Scheduled tasks..."
++echo ""
++CMD="$PHP_BIN -q $PIWIK_PATH -- module=API&method=CoreAdminHome.runScheduledTasks&format=csv&convertToUnicode=0&token_auth=$TOKEN_AUTH"
++$CMD
++echo ""
++echo "Finished Scheduled tasks."
++echo ""
+Index: misc/cron/archive-week-month-year.sh
+===================================================================
+--- misc/cron/archive-week-month-year.sh	(revision 0)
++++ misc/cron/archive-week-month-year.sh	(working copy)
+@@ -0,0 +1,102 @@
++#!/bin/sh +e
++
++# Description
++# This cron script will automatically run Piwik archiving every hour.
++# The script will also run scheduled tasks configured within piwik using
++# the event hook 'TaskScheduler.getScheduledTasks'
++
++# It automatically fetches the Super User token_auth
++# and triggers the archiving for all websites for all periods.
++# This ensures that all reports are pre-computed and Piwik renders very fast.
++
++# Documentation
++# Please check the documentation on http://piwik.org/docs/setup-auto-archiving/
++
++# How to setup the crontab job?
++# Add the following lines in your crontab file, eg. /etc/cron.d/piwik-archive
++#---------------START CRON TAB--
++#MAILTO="youremail@example.com"
++#5 * * * * www-data /path/to/piwik/misc/cron/archive.sh > /dev/null
++#-----------------END CRON TAB--
++# When an error occurs (eg. php memory error, timeout) the error messages
++# will be sent to youremail@example.com.
++#
++# Optimization for high traffic websites
++# You may want to override the following settings in config/config.ini.php:
++# See documentation of the fields in your piwik/config/config.ini.php
++#
++# [General]
++# time_before_archive_considered_outdated = 3600
++# enable_browser_archiving_triggering = false
++#===========================================================================
++
++for TEST_PHP_BIN in php5 php php-cli php-cgi; do
++  if which $TEST_PHP_BIN >/dev/null 2>/dev/null; then
++    PHP_BIN=`which $TEST_PHP_BIN`
++    break
++  fi
++done
++if test -z $PHP_BIN; then
++  echo "php binary not found. Make sure php5 or php exists in PATH." >&2
++  exit 1
++fi
++
++act_path() {
++  local pathname="$1"
++  readlink -f "$pathname" 2>/dev/null || \
++  realpath "$pathname" 2>/dev/null || \
++  type -P "$pathname" 2>/dev/null
++}
++
++ARCHIVE=`act_path ${0}`
++PIWIK_CRON_FOLDER=`dirname ${ARCHIVE}`
++PIWIK_PATH="$PIWIK_CRON_FOLDER"/../../index.php
++PIWIK_CONFIG="$PIWIK_CRON_FOLDER"/../../config/config.ini.php
++
++PIWIK_SUPERUSER=`sed '/^\[superuser\]/,$!d;/^login[ \t]*=[ \t]*"*/!d;s///;s/"*[ \t]*$//;q' $PIWIK_CONFIG`
++PIWIK_SUPERUSER_MD5_PASSWORD=`sed '/^\[superuser\]/,$!d;/^password[ \t]*=[ \t]*"*/!d;s///;s/"*[ \t]*$//;q' $PIWIK_CONFIG`
++
++CMD_TOKEN_AUTH="$PHP_BIN -q $PIWIK_PATH -- module=API&method=UsersManager.getTokenAuth&userLogin=$PIWIK_SUPERUSER&md5Password=$PIWIK_SUPERUSER_MD5_PASSWORD&format=php&serialize=0"
++TOKEN_AUTH=`$CMD_TOKEN_AUTH`
++
++CMD_GET_ID_SITES="$PHP_BIN -q $PIWIK_PATH -- module=API&method=SitesManager.getAllSitesId&token_auth=$TOKEN_AUTH&format=csv&convertToUnicode=0"
++ID_SITES=`$CMD_GET_ID_SITES`
++
++CMD_GET_SEGMENTS_TO_ARCHIVE="$PHP_BIN -q $PIWIK_PATH -- module=API&method=CoreAdminHome.getKnownSegmentsToArchive&token_auth=$TOKEN_AUTH&format=csv&convertToUnicode=0"
++SEGMENTS_TO_ARCHIVE=`$CMD_GET_SEGMENTS_TO_ARCHIVE`
++
++echo "Starting Piwik reports archiving..."
++echo ""
++for idsite in $ID_SITES; do
++  TEST_IS_NUMERIC=`echo $idsite | egrep '^[0-9]+$'`
++  if test -n "$TEST_IS_NUMERIC"; then
++    for period in day week month year; do
++      echo ""
++      echo "Archiving period = $period for idsite = $idsite..."
++      CMD="$PHP_BIN -q $PIWIK_PATH -- module=API&method=VisitsSummary.getVisits&idSite=$idsite&period=$period&date=last52&format=xml&token_auth=$TOKEN_AUTH"
++      $CMD
++      
++      for segment in $SEGMENTS_TO_ARCHIVE; do
++	    if test $segment != "value"; then
++      	  echo ""
++      	  echo " - Archiving for visitor segment $segment ..." 
++      	  CMD_ARCHIVE_SEGMENT="${CMD}&segment=$segment"
++      	  $CMD_ARCHIVE_SEGMENT
++      	fi
++      done
++    done
++
++    echo ""
++    echo "Archiving for idsite = $idsite done!"
++  fi
++done
++
++echo "Reports archiving finished."
++echo "---------------------------"
++echo "Starting Scheduled tasks..."
++echo ""
++CMD="$PHP_BIN -q $PIWIK_PATH -- module=API&method=CoreAdminHome.runScheduledTasks&format=csv&convertToUnicode=0&token_auth=$TOKEN_AUTH"
++$CMD
++echo ""
++echo "Finished Scheduled tasks."
++echo ""
+Index: plugins/Actions/Actions.php
+===================================================================
+--- plugins/Actions/Actions.php	(revision 7789)
++++ plugins/Actions/Actions.php	(working copy)
+@@ -512,7 +512,6 @@
+ 	function addWidgets()
+ 	{
+ 		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPages', 'Actions', 'getPageUrls');
+-		Piwik_AddWidget( 'Actions_Actions', 'Actions_WidgetPageTitles', 'Actions', 'getPageTitles');
+ 		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuOutlinks', 'Actions', 'getOutlinks');
+ 		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuDownloads', 'Actions', 'getDownloads');
+ 		Piwik_AddWidget( 'Actions_Actions', 'Actions_WidgetPagesEntry', 'Actions', 'getEntryPageUrls');
+@@ -535,11 +534,10 @@
+ 	
+ 	function addMenus()
+ 	{
+-		Piwik_AddMenu('Actions_Actions', '', array('module' => 'Actions', 'action' => 'indexPageUrls'), true, 15);
+-		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPages', array('module' => 'Actions', 'action' => 'indexPageUrls'), true, 1);
+-		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPagesEntry', array('module' => 'Actions', 'action' => 'indexEntryPageUrls'), true, 2);
++		Piwik_AddMenu('Actions_Actions', '', array('module' => 'ThoughtFarmer', 'action' => 'getPageHierarchy'), true, 15);
++		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPages', array('module' => 'Actions', 'action' => 'indexPageUrls'), true, 2);
++		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPagesEntry', array('module' => 'Actions', 'action' => 'indexEntryPageUrls'), true, 3);
+ 		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPagesExit', array('module' => 'Actions', 'action' => 'indexExitPageUrls'), true, 3);
+-		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuPageTitles', array('module' => 'Actions', 'action' => 'indexPageTitles'), true, 4);
+ 		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuOutlinks', array('module' => 'Actions', 'action' => 'indexOutlinks'), true, 6);
+ 		Piwik_AddMenu('Actions_Actions', 'Actions_SubmenuDownloads', array('module' => 'Actions', 'action' => 'indexDownloads'), true, 7);
+ 
+Index: plugins/Actions/Controller.php
+===================================================================
+--- plugins/Actions/Controller.php	(revision 7789)
++++ plugins/Actions/Controller.php	(working copy)
+@@ -48,6 +48,14 @@
+ 		return $this->renderView($view, $fetch);
+ 	}
+ 
++	protected function configureViewPageTitles($view)
++	{
++		$view->setColumnsToDisplay( array('label','nb_hits','nb_visits','nb_page_edit','nb_page_comment') );
++
++		$view->setColumnTranslation('nb_page_edit', 'Edits');
++		$view->setColumnTranslation('nb_page_comment', 'Comments');
++	}
++
+ 	protected function configureViewPages($view)
+ 	{
+ 		$view->setColumnsToDisplay( array('label','nb_hits','nb_visits', 'bounce_rate', 'avg_time_on_page', 'exit_rate') );
+@@ -237,7 +245,6 @@
+ 			'Actions.getExitPageTitles' => Piwik_Translate('Actions_ExitPageTitles'),
+ 		));
+ 		$view->setReportUrl('Actions', $this->getPageTitlesActionForLink());
+-		$this->configureViewPages($view);
+ 		$this->configureViewActions($view);
+ 		return $this->renderView($view, $fetch);
+ 	}
+@@ -249,7 +256,7 @@
+ 						__FUNCTION__,
+ 						'Actions.getPageTitles',
+ 						'getPageTitlesSubDataTable'  );
+-		$this->configureViewPages($view);
++		$this->configureViewPageTitles($view);
+ 		$this->configureViewActions($view);
+ 		return $this->renderView($view, $fetch);
+ 	}
+Index: plugins/CoreHome/templates/logo.tpl
+===================================================================
+--- plugins/CoreHome/templates/logo.tpl	(revision 7789)
++++ plugins/CoreHome/templates/logo.tpl	(working copy)
+@@ -1,5 +1,4 @@
+ <span id="logo">
+-<a href="index.php" title="{if $isCustomLogo}{'General_PoweredBy'|translate} {/if}Piwik # {'General_OpenSourceWebAnalytics'|translate}" style="text-decoration: none;">
+-	<img src='{$logoHeader}' alt="{if $isCustomLogo}{'General_PoweredBy'|translate} {/if}Piwik" style='margin-left:10px' height='50px'/>
++<a href="index.php" title="Intranet Statistics" style="text-decoration: none;">
+ </a>
+ </span>
+Index: plugins/Dashboard/Controller.php
+===================================================================
+--- plugins/Dashboard/Controller.php	(revision 7789)
++++ plugins/Dashboard/Controller.php	(working copy)
+@@ -171,7 +171,7 @@
+         }
+         $login = Piwik::getCurrentUserLogin();
+ 
+-        $dashboards = Piwik_Dashboard::getAllDashboards($login);
++            $dashboards = Piwik_Dashboard::getAllDashboards($login);
+ 
+         Piwik_DataTable_Renderer_Json::sendHeaderJSON();
+         echo Piwik_Common::json_encode($dashboards);
+@@ -192,13 +192,13 @@
+         $user  = Piwik::getCurrentUserLogin();
+         $nextId = $this->getNextIdDashboard($user);
+ 
+-        $name   = urldecode(Piwik_Common::getRequestVar('name', '', 'string'));
+-        $type   = urldecode(Piwik_Common::getRequestVar('type', 'default', 'string'));
+-        $layout = '{}';
++            $name   = urldecode(Piwik_Common::getRequestVar('name', '', 'string'));
++            $type   = urldecode(Piwik_Common::getRequestVar('type', 'default', 'string'));
++            $layout = '{}';
+ 
+-        if ($type == 'default') {
+-            $layout = $this->getDefaultLayout();
+-        }
++            if ($type == 'default') {
++                $layout = $this->getDefaultLayout();
++            }
+ 
+         $query = sprintf('INSERT INTO %s (login, iddashboard, name, layout) VALUES (?, ?, ?, ?)',
+                          Piwik_Common::prefixTable('user_dashboard'));
+@@ -235,8 +235,8 @@
+         $idDashboard = Piwik_Common::getRequestVar('dashboardId', 0, 'int');
+         $layout      = $this->_getLayoutForUser($login, $idDashboard);
+ 
+-        if($layout !== false) {
+-	        $nextId = $this->getNextIdDashboard($user);
++	        if($layout !== false) {
++		        $nextId = $this->getNextIdDashboard($user);
+ 
+ 	        $query = sprintf('INSERT INTO %s (login, iddashboard, name, layout) VALUES (?, ?, ?, ?)',
+ 		        Piwik_Common::prefixTable('user_dashboard'));
+@@ -373,23 +373,20 @@
+         	
+             $defaultLayout = '[
+                 [
+-                    {"uniqueId":"widgetVisitsSummarygetEvolutionGraphcolumnsArray","parameters":{"module":"VisitsSummary","action":"getEvolutionGraph","columns":"nb_visits"}},
+-                    {"uniqueId":"widgetLivewidget","parameters":{"module":"Live","action":"widget"}},
+-                    {"uniqueId":"widgetVisitorInterestgetNumberOfVisitsPerVisitDuration","parameters":{"module":"VisitorInterest","action":"getNumberOfVisitsPerVisitDuration"}}
++                                {"uniqueId":"widgetThoughtFarmergetUserActivity","parameters":{"module":"ThoughtFarmer","action":"getUserActivity","viewDataTable":"table"}},
++                                {"uniqueId":"widgetThoughtFarmergetPageHierarchy","parameters":{"module":"ThoughtFarmer","action":"getPageHierarchy"}},
++                                {"uniqueId":"widgetUserSettingsgetBrowser","parameters":{"module":"UserSettings","action":"getBrowser","viewDataTable":"graphPie"}}
+                 ],
+                 [
+-                	'.$donateWidget.'
+-                    {"uniqueId":"widgetReferersgetKeywords","parameters":{"module":"Referers","action":"getKeywords"}},
+-                    {"uniqueId":"widgetReferersgetWebsites","parameters":{"module":"Referers","action":"getWebsites"}}
++                                {"uniqueId":"widgetThoughtFarmergetSearches","parameters":{"module":"ThoughtFarmer","action":"getSearches"}},
++                                {"uniqueId":"widgetVisitTimegetVisitInformationPerServerTime","parameters":{"module":"VisitTime","action":"getVisitInformationPerServerTime"}},
++                                {"uniqueId":"widgetVisitsSummarygetEvolutionGraphcolumnsArray","parameters":{"module":"VisitsSummary","action":"getEvolutionGraph","columns":["nb_visits"]}}
+                 ],
+                 [
+-                    {"uniqueId":"widgetUserCountryMapworldMap","parameters":{"module":"UserCountryMap","action":"worldMap"}},
+-                    {"uniqueId":"widgetUserSettingsgetBrowser","parameters":{"module":"UserSettings","action":"getBrowser"}},
+-                    {"uniqueId":"widgetReferersgetSearchEngines","parameters":{"module":"Referers","action":"getSearchEngines"}},
+-                    {"uniqueId":"widgetVisitTimegetVisitInformationPerServerTime","parameters":{"module":"VisitTime","action":"getVisitInformationPerServerTime"}},
+-                    {"uniqueId":"widgetExampleRssWidgetrssPiwik","parameters":{"module":"ExampleRssWidget","action":"rssPiwik"}}
++                                {"uniqueId":"widgetLivewidget","parameters":{"module":"Live","action":"widget"}}
+                 ]
+             ]';
++
+         }
+         $defaultLayout = $this->removeDisabledPluginFromLayout($defaultLayout);
+         return $defaultLayout;
+Index: plugins/Goals/API.php
+===================================================================
+--- plugins/Goals/API.php	(revision 7789)
++++ plugins/Goals/API.php	(working copy)
+@@ -94,7 +94,7 @@
+ 	 */
+ 	public function addGoal( $idSite, $name, $matchAttribute, $pattern, $patternType, $caseSensitive = false, $revenue = false, $allowMultipleConversionsPerVisit = false)
+ 	{
+-		Piwik::checkUserHasAdminAccess($idSite);
++		Piwik::checkUserHasViewAccess($idSite);
+ 		$this->checkPatternIsValid($patternType, $pattern);
+ 		$name = $this->checkName($name);
+ 		$pattern = $this->checkPattern($pattern);
+@@ -143,7 +143,7 @@
+ 	 */
+ 	public function updateGoal( $idSite, $idGoal, $name, $matchAttribute, $pattern, $patternType, $caseSensitive = false, $revenue = false, $allowMultipleConversionsPerVisit = false)
+ 	{
+-		Piwik::checkUserHasAdminAccess($idSite);
++		Piwik::checkUserHasViewAccess($idSite);
+ 		$name = $this->checkName($name);
+ 		$pattern = $this->checkPattern($pattern);
+ 		$this->checkPatternIsValid($patternType, $pattern);
+@@ -191,7 +191,7 @@
+ 	 */
+ 	public function deleteGoal( $idSite, $idGoal )
+ 	{
+-		Piwik::checkUserHasAdminAccess($idSite);
++		Piwik::checkUserHasViewAccess($idSite);
+ 		Piwik_Query("UPDATE ".Piwik_Common::prefixTable('goal')."
+ 										SET deleted = 1
+ 										WHERE idsite = ? 
+Index: plugins/Goals/Controller.php
+===================================================================
+--- plugins/Goals/Controller.php	(revision 7789)
++++ plugins/Goals/Controller.php	(working copy)
+@@ -217,7 +217,7 @@
+ 		$view = $this->getOverviewView();
+ 		$view->goalsJSON = Piwik_Common::json_encode($this->goals);
+ 		$view->goalDimensions = Piwik_Goals::getReportsWithGoalMetrics();
+-		$view->userCanEditGoals = Piwik::isUserHasAdminAccess($this->idSite);
++		$view->userCanEditGoals = Piwik::isUserHasViewAccess($this->idSite);
+ 		$view->ecommerceEnabled = $this->site->isEcommerceEnabled();
+ 		$view->displayFullReport = true;
+ 		echo $view->render();
+@@ -287,7 +287,7 @@
+ 	{
+ 		$view = Piwik_View::factory('add_new_goal');
+ 		$this->setGeneralVariablesView($view);
+-		$view->userCanEditGoals = Piwik::isUserHasAdminAccess($this->idSite);
++		$view->userCanEditGoals = Piwik::isUserHasViewAccess($this->idSite);
+ 		$view->onlyShowAddNewGoal = true;
+ 		echo $view->render();
+ 	}
+Index: plugins/Live/templates/lastVisits.tpl
+===================================================================
+--- plugins/Live/templates/lastVisits.tpl	(revision 7789)
++++ plugins/Live/templates/lastVisits.tpl	(working copy)
+@@ -23,6 +23,7 @@
+ 				{if $visitor.visitorTypeIcon}
+ 					<a class="rightLink" href="javascript:broadcast.propagateAjax('module=Live&action=getVisitorLog&period=month&segment=visitorId=={$visitor.visitorId}')">
+ 					&nbsp;- <img src="{$visitor.visitorTypeIcon}" title="{'General_ReturningVisitor'|translate} - {'General_ReturningVisitorAllVisits'|translate}" />
++                    &nbsp;{$visitor.liveUsername}                    
+ 					</a>
+ 				{/if}
+ 				{if $visitor.visitIp}- <span title="{if !empty($visitor.visitorId)}{'General_VisitorID'|translate}: {$visitor.visitorId}{/if}">IP: {$visitor.visitIp}</span>{/if}
+Index: plugins/Live/templates/visitorLog.tpl
+===================================================================
+--- plugins/Live/templates/visitorLog.tpl	(revision 7789)
++++ plugins/Live/templates/visitorLog.tpl	(working copy)
+@@ -105,6 +105,7 @@
+ 					<br/>
+ 					{$visitorColumnContent}
+ 				{/if}
++				<br />{$visitor.columns.liveUsername}				
+ 	</td>
+ 	
+ 	{if $displayVisitorsInOwnColumn}
+Index: plugins/Live/Visitor.php
+===================================================================
+--- plugins/Live/Visitor.php	(revision 7789)
++++ plugins/Live/Visitor.php	(working copy)
+@@ -103,6 +103,7 @@
+ 			'screenTypeIcon' => $this->getScreenTypeIcon(),
+ 			'plugins' => $this->getPlugins(),
+ 			'pluginsIcons' => $this->getPluginIcons(),
++			'liveUsername' => $this->getLiveUsername()
+ 		);
+ 	}
+ 
+@@ -530,4 +531,12 @@
+ 	{
+ 		return $this->details['visit_goal_converted'];
+ 	}
++
++	function getLiveUsername()
++	{
++		if(isset($this->details['thoughtfarmer_username'])){
++			return $this->details['thoughtfarmer_username'];
++		}
++		return false;
++	}
+ }
+Index: plugins/Login/templates/login.tpl
+===================================================================
+--- plugins/Login/templates/login.tpl	(revision 7789)
++++ plugins/Login/templates/login.tpl	(working copy)
+@@ -1,4 +1,5 @@
+ {include file="Login/templates/header.tpl"}
++{include file="Login/templates/termsAndConditions.tpl"}
+ 
+ <div id="login">
+ 
+@@ -43,6 +44,10 @@
+ 		<input type="password" name="form_password" id="login_form_password" class="input" value="" size="20" tabindex="20" /></label>
+ 	</p>
+ 	
++	<p class="acceptTermsCheckbox">
++		<label><input name="form_acceptterms" id="form_acceptterms" value="1" tabindex="89" type="checkbox" /> I accept the </label> <a id="termsLink" href="#">Terms and Conditions </a>
++	</p>
++
+ 	<p class="forgetmenot">
+ 		<label><input name="form_rememberme" type="checkbox" id="login_form_rememberme" value="1" tabindex="90" {if $form_data.form_rememberme.value}checked="checked" {/if}/> {'Login_RememberMe'|translate} </label>
+ 	</p>
+Index: plugins/Login/templates/termsAndConditions.tpl
+===================================================================
+--- plugins/Login/templates/termsAndConditions.tpl	(revision 0)
++++ plugins/Login/templates/termsAndConditions.tpl	(working copy)
+@@ -0,0 +1,330 @@
++{literal}
++<script type="text/javascript" src="libs/jquery/jquery.cookie.js"></script>
++<script type="text/javascript">
++function submitLoginForm() {
++	var checked = $('#form_acceptterms').attr('checked');
++	if (checked) {
++		$.cookie("termsaccepted", 'true', { expires: 365 });
++		return true;
++	} else {
++		$.cookie("termsaccepted", 'false');
++		alert('Please accept the Terms and Conditions.');
++		return false;
++	}
++}
++
++function dontAcceptTerms() {
++	$('#terms').hide();
++	$('#login').show();
++	$('#form_acceptterms').attr('checked', false);
++}
++
++function acceptTerms() {
++	$('#terms').hide();
++	$('#login').show();
++	$('#form_acceptterms').attr('checked', true);
++}
++
++function showTerms() {
++	$('#terms').show();
++	$('#login').hide();
++	return false;
++}
++
++$(document).ready(function() {
++
++	// bind events
++	$('#acceptButton').click(acceptTerms);
++	$('#dontAcceptButton').click(dontAcceptTerms);	
++	$('#termsLink').click(showTerms);		
++	$('#loginform').submit(submitLoginForm);
++	
++	// check cookie and check the terms accepted checkbox
++	var accepted =	$.cookie("termsaccepted");
++	$('#form_acceptterms').attr('checked', accepted == 'true');	
++
++});
++
++</script>
++<style type="text/css">
++.termsButton {
++    color: #224466;
++	background-color: #CEE1EF !important;
++	-moz-border-radius: 3px 3px 3px 3px;
++    border: 1px solid #80B5D0;
++    cursor: default;
++    font-size: 13px;
++    margin: 0;
++    padding: 3px 5px;
++    text-decoration: none;
++}
++.termsBoxOuter {
++    background-color: #EAF3FA;
++	-moz-border-radius: 5px 5px 5px 5px;
++    font-weight: bold;
++    padding: 16px 16px 10px;
++	width:70%; 
++	margin: 20px auto;
++	display: none;
++}
++.termsBoxInner {
++	background-color: white; 
++	border: 1px solid black; 
++	margin-top:15px;
++	font-weight: normal;
++	padding: 6px;
++}
++.termsButtonsContainer {
++	text-align: right; 
++	margin-top: 10px;
++}
++.acceptTermsCheckbox {
++	font-weight:normal;
++}
++#acceptButton { 
++	font-weight: bold;
++	padding: 3px 18px; 
++}
++#terms p { margin-bottom: 18px; }
++</style>
++<div id="terms" class="termsBoxOuter">
++<h1>Terms and Conditions</h1>
++<h3>Please Read Carefully</h3>
++<div class="termsBoxInner">
++<p>THIS IS PART OF A LEGAL AND ENFORCEABLE CONTRACT
++BETWEEN YOU AND OPENROAD COMMUNICATIONS INC. ("OPENROAD") BY
++ACCESSING THIS SERVICE AND CLICKING ON THE &ldquo;AGREE&rdquo; OR
++&ldquo;YES&rdquo; BUTTON DURING THE REGISTRATION PROCESS YOU AGREE
++TO THIS AGREEMENT. IF YOU DO NOT AGREE TO THIS AGREEMENT DURING THE
++REGISTRATION PROCESS, CLICK ON THE &ldquo;I DO NOT AGREE&rdquo; OR
++&ldquo;NO&rdquo; BUTTON, AND MAKE NO FURTHER USE OF THE
++SERVICE.</p>
++<p>OPENROAD MAY IN ITS SOLE DISCRETION, BY POSTING A
++REVISED AGREEMENT ON THE WEBSITE STATS.THOUGHTFARMER.COM, CHANGE
++THE TERMS OF THIS AGREEMENT FROM TIME TO TIME AS IT RELATES TO YOUR
++FUTURE USE OF THIS SERVICE. BY USING THE SERVICE AFTER THE REVISED
++AGREEMENT HAS BEEN POSTED, YOU SIGNIFY YOUR ACCEPTANCE AND
++AGREEMENT TO BE BOUND BY THE REVISED TERMS. YOU MAY NOT CHANGE
++THESE TERMS IN ANY MANNER. EACH TIME YOU USE THE SERVICE YOU
++SIGNIFY YOUR ACCEPTANCE AND AGREEMENT TO THE CURRENT VERSION OF
++THIS AGREEMENT. IF YOU DO NOT AGREE WITH EACH PROVISION OF THIS
++AGREEMENT, DO NOT USE THE SERVICE.</p>
++<p>OpenRoad Communications Ltd. (&ldquo;OpenRoad&rdquo;)
++provides its online data management service for ThoughtFarmer
++intranet statistics commonly known as "Intranet Statistics"
++(&ldquo;Service&rdquo;) to you (&ldquo;Subscriber&rdquo;) upon the
++terms and conditions set out below. By using the Service,
++Subscriber agrees to abide by the terms of this agreement
++(&ldquo;Agreement&rdquo;).</p>
++
++<p>1. &nbsp; <strong>License.</strong> Your right to use the Service is
++subject to this Agreement and is made subject to the GNU General
++Public License version 3 pursuant to which the software underlying
++the Service is provided. OpenRoad may from time to time modify or
++enhance the Service without notice to you. Your access to the
++Service will be terminated without notice if your maintenance
++account for OpenRoad's ThoughtFarmer software expires or is
++otherwise terminated.</p>
++<p>2. &nbsp; <strong>Subscriber's Account.</strong> Subscriber is
++responsible for all access to the Service by Subscriber's personnel
++or designated Users, whether or not Subscriber has knowledge of or
++authorizes such use.</p>
++<p>3. &nbsp; <strong>Subscriber&rsquo;s Internal Policies.</strong> OpenRoad
++is not responsible for compliance with Subscriber&rsquo;s internal
++policies, regardless of whether it has notice of them.</p>
++<p>4. &nbsp; <strong>Term.</strong> OpenRoad may in its sole discretion
++discontinue offering the Service at anytime without notice to
++Subscriber.</p>
++<p>5. &nbsp; <strong>Intellectual Property.</strong> ThoughtFarmer, the
++ThoughtFarmer logo and other OpenRoad logos and product and service
++names, including without limitation "Intranet Statistics" are
++trademarks of OpenRoad (the &ldquo;OpenRoad Marks&rdquo;), whether
++or not registered. Without OpenRoad`s prior permission, Subscriber
++agrees not to display or use, in any manner, the OpenRoad
++Marks.</p>
++<p>6. &nbsp; <strong>Prohibited Uses.</strong> Subscriber agrees not to
++access the Service by any means other than through the interface
++that is provided by OpenRoad. Subscriber shall not access the
++Service for the purpose of data mining or extracting content from
++the Service beyond Subscriber&rsquo;s own data.</p>
++<p>The Service has been designed so that each
++Subscriber&rsquo;s data ("Subscriber's Data") can only be accessed
++by that Subscriber (including Subscriber&rsquo;s Users). Subscriber
++agrees that it will not attempt to access, download, copy or
++otherwise use any information provided by the Service that does not
++belong to Subscriber or that Subscriber is not authorized to
++access, and Subscriber agrees to ensure that each individual User
++authorized by Subscriber does not do so or attempt to do so. If,
++however, Subscriber or any User authorized by Subscriber does
++access, receive or otherwise obtain any such unauthorized
++information, then Subscriber agrees to treat such information as
++strictly confidential and promptly notify OpenRoad, and not to
++download, copy, transmit or otherwise use any of such unauthorized
++information, except as may be expressly authorized by
++OpenRoad.</p>
++<p>7. &nbsp; <strong>Security.</strong> OpenRoad will maintain the Service
++at a reputable third party hosting facility, where commercially
++reasonable security precautions are taken to prevent unauthorized
++access to the Service. Subscriber acknowledges that,
++notwithstanding such security precautions, use of, or connection to
++the Internet provides the opportunity for unauthorized third
++parties to circumvent such precautions and illegally gain access to
++the Service and Subscriber&rsquo;s Data. ACCORDINGLY, OPENROAD
++CANNOT AND DOES NOT GUARANTY THE PRIVACY, SECURITY, OR AUTHENTICITY
++OF ANY INFORMATION SO TRANSMITTED OR STORED IN ANY SYSTEM CONNECTED
++TO THE INTERNET.</p>
++<p>8. &nbsp; <strong>Rights in Data.</strong> All property rights in the
++Subscriber&rsquo;s Data that is provided by Subscriber, or by any
++party authorized by Subscriber to submit data to the Service,
++including without limitation copyrights, are and shall continue to
++be the exclusive property of Subscriber. Subscriber acknowledges
++and agrees that OpenRoad may disclose Subscriber&rsquo;s Data if
++required to do so by law or with prior written consent of the
++Subscriber. OpenRoad may provide statistical information, using
++Subscriber&rsquo;s data, to third parties, but such information
++will not include personally identifying information. OpenRoad may
++access Subscriber&rsquo;s Data to respond to service or technical
++problems with the Service.</p>
++<p>OpenRoad shall retain Subscriber&rsquo;s Data for a
++period of thirty (30) days after expiration or termination of this
++Agreement. After thirty (30 days), OpenRoad may delete and destroy
++all Subscriber&rsquo;s Data without notice or further liability to
++the Subscriber.</p>
++<p>OpenRoad reserves the right to establish (and notify
++the Subscriber of) a maximum amount of memory or other computer
++storage and a maximum amount of Subscriber&rsquo;s Data that
++Subscriber may post, store, or transmit on or through the
++Service.</p>
++<p>9. &nbsp; <strong>Responsibility/Indemnity.</strong> Subscriber is solely
++responsible for all access to the Service and use of the
++Subscriber&rsquo;s Data by Subscriber&rsquo;s personnel or the use
++of Subscriber&rsquo;s account, whether or not Subscriber has
++knowledge of or authorizes such use. Subscriber and Users shall
++maintain the confidentiality of password and account log-in
++identification. Subscriber agrees to indemnify and hold harmless
++OpenRoad against any liability or claim of any person that relates
++to or principally caused by Subscriber's use of the Service.</p>
++<p>Subscriber acknowledges that OpenRoad has no control
++over the source, quality, format, nature, ownership or legality of
++information submitted to the Service by the Subscriber or third
++parties and that the Subscriber is responsible for any claims or
++liabilities that may arise from the Subscriber&rsquo;s actions in
++extracting or submitting information to the Service.</p>
++<p>10. &nbsp; <strong>Warranty.</strong></p>
++<p>OpenRoad warrants that:</p>
++<p>(i) It has the power, authority and capacity, and has
++received all necessary authorizations and approvals, to enter into
++this Agreement, (ii) it owns or has all rights in and to the
++intellectual property rights in the Service necessary to grant the
++licenses granted in this Agreement, (iii) the use of the Service in
++accordance with the terms of this Agreement does not , and will not
++infringe on the intellectual property rights of a third party, (iv)
++the Service will conform to the written descriptions that have been
++provided to the Subscriber as are set out in the Schedules to this
++Agreement and that are found at http://stats.thoughtfarmer.com/
++at the date of this Agreement<strong>,</strong> (v) OpenRoad will
++take all reasonable steps to ensure the Service will be free of
++viruses, malicious codes and spy-ware throughout the term of this
++Agreement, (vi) OpenRoad will undertake all reasonable efforts to
++correct any material errors in the service.</p>
++<p>11. &nbsp; <strong>Disclaimer and Limitation of Liability.</strong></p>
++<p>EXCEPT AS PROVIDED IN THE WARRANTY ABOVE SUBSCRIBER
++EXPRESSLY UNDERSTANDS AND AGREES THAT:</p>
++<p>SUBSCRIBER&rsquo;S USE OF THE SERVICE IS AT
++SUBSCRIBER&rsquo;S SOLE RISK. THE SERVICE IS PROVIDED ON AN
++&ldquo;AS IS&rdquo; AND &ldquo;AS AVAILABLE&rdquo;
++BASIS.</p>
++<p>OPENROAD MAKES NO REPRESENTATION OR WARRANTY THAT (i)
++THE SERVICE WILL MEET SUBSCRIBER&rsquo;S REQUIREMENTS, (ii) THE
++SERVICE WILL BE UNINTERRUPTED, TIMELY, SECURE, OR ERROR-FREE, (iii)
++THE RESULTS THAT MAY BE OBTAINED FROM THE USE OF THE SERVICE WILL
++BE ACCURATE OR RELIABLE, (iv) THE PERFORMANCE OF THE INTERNET WILL
++BE UNINTERRUPTED OR PERFORM AT SPECIFIED RATES, (v)
++SUBSCRIBER&rsquo;S INTERNET SERVICE PROVIDER WILL PROVIDE
++UNINTERRUPTED SERVICE OR PERFORM AT SPECIFIED RATES.</p>
++<p>SUBSCRIBER EXPRESSLY UNDERSTANDS AND AGREES THAT
++OPENROAD SHALL NOT BE LIABLE FOR ANY, INDIRECT, INCIDENTAL,
++SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES, INCLUDING BUT NOT
++LIMITED TO, DAMAGES FOR LOSS OF REVENUES, PROFITS, GOODWILL, USE,
++SUBSCRIBER&rsquo;S DATA, BODILY INJURY OR PROPERTY DAMAGE, FAILURE
++TO REALIZE EXPECTED SAVINGS, OR OTHER INTANGIBLE LOSSES (EVEN IF
++OPENROAD HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES),
++RESULTING FROM: (i) THE USE OR THE INABILITY TO USE THE SERVICE;
++(ii) INVALID DESTINATIONS, TRANSMISSION ERRORS, OR UNAUTHORIZED
++ACCESS TO OR ALTERATION OF SUBSCRIBER&rsquo;S TRANSMISSIONS OR
++SUBSCRIBER&rsquo;S DATA.</p>
++<p>NO CLAIM, REGARDLESS OF FORM, MAY BE MADE OR ACTION
++BROUGHT BY EITHER PARTY MORE THAN ONE YEAR AFTER THE BASIS FOR THE
++CLAIM BECOMES KNOWN TO THE PARTY ASSERTING IT.</p>
++<p>WITHOUT LIMITING THE GENERALITY OF THE FOREGOING,
++OPENROAD LIABILITY TO SUBSCRIBER PURSUANT TO THIS AGREEMENT OR
++PURSUANT TO ANY OTHER LEGAL THEORY, INCLUDING LEGAL FEES AND
++AWARDABLE COSTS, SHALL NEVER EXCEED THE AMOUNT PAID BY SUBSCRIBER
++TO OPENROAD IN THE PREVIOUS TWELVE MONTHS FOR THE USE OF THE
++SERVICE .</p>
++<p>12. &nbsp; <strong>Termination for Breach.</strong> Upon the occurrence of
++any of the following events: (i) the other party materially
++breaches or defaults in any of the material terms or conditions of
++this Agreement, (ii) the other party makes any assignment for the
++benefit of creditors, is insolvent or unable to pay its debts as
++they mature in the ordinary course of business, or (iii) any
++proceedings are instituted by or against the other party in
++bankruptcy or under any insolvency laws or for reorganization,
++receivership or dissolution, or (iv) if Subscriber`s license to use
++the ThoughtFarmer software is terminated, then the non-defaulting
++party may give the other party written notice of such default and
++an opportunity to cure the default within thirty (30) days after
++receipt of such notice, failing which the non-defaulting party may
++cancel this Agreement without notice.</p>
++<p>13. &nbsp; <strong>Publicity.</strong> OpenRoad may use Subscriber&rsquo;s
++name as part of a general list of customers and may refer to
++Subscriber as a user of the Service in general advertising and
++marketing materials. Each party shall obtain the other&rsquo;s
++permission prior to using the other party&rsquo;s name for any
++other marketing or promotional purposes. The parties agree that any
++press release or other public comments issued by either party
++relating to this agreement will be prepared jointly between
++OpenRoad and the Subscriber.</p>
++<p>14. &nbsp; <strong>Force Majeure.</strong> Neither party is liable for any
++delay, interruption or failure in the performance of its
++obligations if caused by acts of God, war (declared or undeclared),
++fire, flood, storm, slide, earthquake, power failure, inability to
++obtain equipment, supplies or other facilities not caused by a
++failure to pay, labour disputes, or other similar event beyond the
++control of the party affected which may prevent or delay such
++performance. If any such act or event occurs or is likely to occur,
++the party affected shall promptly notify the other, giving
++particulars of the event. The party so affected shall use
++reasonable efforts to eliminate or remedy the event.</p>
++<p>15. &nbsp; <strong>Notices.</strong> All notices required to be given to
++OpenRoad shall be given to OpenRoad as set out in the Schedule A.
++Any notice required to be given by OpenRoad may be given by e-mail
++to the address of Subscriber&rsquo;s Technical and Administrative
++Contact.</p>
++<p>16. &nbsp; <strong>Counterparts/Facsimile.</strong> This agreement may be
++executed in two counterparts, each of which will be deemed to be an
++original, and both of which together shall constitute one
++agreement. This Agreement may be executed via facsimile.</p>
++<p>17. &nbsp; <strong>Sole Agreement.</strong> This Agreement constitutes the
++sole agreement between the parties with respect to the
++Service.</p>
++<p>18. &nbsp; <strong>Governing Law.</strong> The laws of the British
++Columbia govern this Agreement and all disputes arising out of it
++shall be submitted to a court of competent jurisdiction in British
++Columbia.</p>
++<p>19. &nbsp; <strong>Assignment.</strong> This Agreement may not be assigned
++by Subscriber.</p>
++<p>20. &nbsp; <strong>General Provisions.</strong> No waiver of any of the
++provisions of this Agreement shall be deemed to constitute a waiver
++of any other provision nor shall such a waiver constitute a
++continuing waiver unless otherwise expressly provided in writing
++duly executed by the party to be bound. This Agreement is binding
++upon the successors to and permitted assigns of the parties.</p>
++</div>
++<p class="termsButtonsContainer">
++<input value="I Agree" tabindex="-1" id="acceptButton" type="button" class="termsButton" />
++<input value="I Do Not Agree" tabindex="-1" id="dontAcceptButton" type="button" class="termsButton" />
++
++</p>
++</div>
++{/literal}
+Index: plugins/SitesManager/API.php
+===================================================================
+--- plugins/SitesManager/API.php	(revision 7789)
++++ plugins/SitesManager/API.php	(working copy)
+@@ -522,6 +522,8 @@
+ 			$bind['group'] = "";
+ 		}
+ 		
++		$this->obfuscateNextSiteId();
++		
+ 		$db->insert(Piwik_Common::prefixTable("site"), $bind);
+ 									
+ 		$idSite = $db->lastInsertId();
+@@ -537,6 +539,22 @@
+ 		return (int)$idSite;
+ 	}
+ 	
++	// sets the next auto_increment value for the piwik_site.idsite column to the current
++	// max value plus a large random number.
++	private function obfuscateNextSiteId()
++	{
++		$db = Zend_Registry::get('db');
++	
++	     // get the biggest id in the Piwik_Site table
++		$row = $db->fetchRow("SELECT MAX(idsite) AS maxid FROM ".Piwik_Common::prefixTable("site"));
++		
++		// add a random number between 1,000 and 9,999
++		$newId = $row['maxid'] + rand(1000, 9999);
++		
++		// reseed the identity column with the new id
++		$db->query("ALTER TABLE ".Piwik_Common::prefixTable("site")." AUTO_INCREMENT = ". $newId);
++	}
++	
+ 	private function postUpdateWebsite($idSite)
+ 	{
+ 		Piwik_Site::clearCache();
+Index: plugins/ThoughtFarmer/API.php
+===================================================================
+--- plugins/ThoughtFarmer/API.php	(revision 0)
++++ plugins/ThoughtFarmer/API.php	(working copy)
+@@ -0,0 +1,136 @@
++<?php
++/**
++ * Piwik - Open source web analytics
++ *
++ * @link http://piwik.org
++ * @license http://www.gnu.org/licenses/gpl-3.0.html Gpl v3 or later
++ * @version $Id$
++ *
++ * @category Piwik_Plugins
++ * @package Piwik_ThoughtFarmer
++ */
++
++class Piwik_ThoughtFarmer_API
++{
++	static private $instance = null;
++
++	static public function getInstance()
++	{
++		if (self::$instance == null)
++		{
++			$c = __CLASS__;
++			self::$instance = new $c();
++		}
++		return self::$instance;
++	}
++
++	protected function getDataTable($name, $idSite, $period, $date, $expanded, $idSubtable = false, $summarize = false )
++	{
++		Piwik::checkUserHasViewAccess( $idSite );
++
++		$archive = Piwik_Archive::build($idSite, $period, $date );
++
++		if($idSubtable === false)
++		{
++			$idSubtable = null;
++		}
++
++		if($expanded)
++		{
++			$dataTable = $archive->getDataTableExpanded($name, $idSubtable);
++		}
++		else
++		{
++			$dataTable = $archive->getDataTable($name, $idSubtable);
++		}
++
++		if( $summarize )
++		{
++		    $dataTable->queueFilter('AddSummaryRow',0);
++		}
++
++		$dataTable->queueFilter('ReplaceColumnNames', array($expanded));
++		$dataTable->queueFilter('ReplaceSummaryRowLabel');
++
++		return $dataTable;
++	}
++
++	public function getUserActivity( $idSite, $period, $date, $expanded = false, $idSubtable = false )
++	{
++		Piwik::checkUserHasViewAccess($idSite);
++
++		$dataTable = $this->getDataTable('thoughtfarmer_user', $idSite, $period, $date, $expanded, $idSubtable );
++		$dataTable->filter('Sort', array('nb_hits', 'desc', $naturalSort = false, $expanded));
++		
++		return $dataTable;
++	}
++
++	public function getSearches( $idSite, $period, $date, $expanded = false, $idSubtable = false )
++	{
++		Piwik::checkUserHasViewAccess($idSite);
++
++		$dataTable = $this->getDataTable('thoughtfarmer_search', $idSite, $period, $date, $expanded, $idSubtable );
++		$dataTable->filter('Sort', array('nb_searches', 'desc', $naturalSort = false, $expanded));
++
++		return $dataTable;
++	}
++
++	public function getPageHierarchy( $idSite, $period, $date, $expanded = false, $idSubtable = false )
++	{
++		Piwik::checkUserHasViewAccess($idSite);
++
++		$dataTable = $this->getDataTable('thoughtfarmer_page_hierarchy', $idSite, $period, $date, $expanded, $idSubtable );
++		$dataTable->filter('Sort', array('nb_hits', 'desc', $naturalSort = false, $expanded));
++
++		return $dataTable;
++	}
++
++	public function getPageTitle( $idSite, $period, $date, $expanded = false, $idSubtable = false )
++	{
++		Piwik::checkUserHasViewAccess($idSite);
++
++		$dataTable = $this->getDataTable('thoughtfarmer_page_title', $idSite, $period, $date, $expanded, $idSubtable );
++		$dataTable->filter('Sort', array('nb_hits', 'desc', $naturalSort = false, $expanded));
++
++		return $dataTable;
++	}
++
++	public function getUsersOnline( $idSite )
++	{
++		Piwik::checkUserHasViewAccess($idSite);
++
++		return $this->loadUsersOnline($idSite);
++	}
++
++	protected function loadUsersOnline( $idSite )
++	{
++		$query = "SELECT
++				t1.thoughtfarmer_username as label,
++				t1.visit_last_action_time as last_activity,
++				t1.visit_total_time as total_time_spent
++			    FROM `".Piwik_Common::prefixTable('log_visit')."` as t1
++			    WHERE visit_last_action_time >= ?
++				 	AND idsite = ?
++					AND thoughtfarmer_username is not null
++			    ORDER BY last_activity ASC";
++
++		$date = Piwik_Date::factory( (int)(time() - Zend_Registry::get('config')->Tracker->visit_standard_length) );
++		
++		$results = Zend_Registry::get('db')->fetchAll($query,
++			array( $date->getDatetime(), $idSite)
++			);
++
++		$dataTable = new Piwik_DataTable();
++		$dataTable->addRowsFromSimpleArray($results);
++		
++		$dataTable->filter('ColumnCallbackReplace', array('total_time_spent', 'Piwik::getPrettyTimeFromSeconds'));
++		$dataTable->filter('ColumnCallbackReplace', array('last_activity', 'Piwik_calculateLastActivityTime'));
++		
++		return $dataTable;
++	}
++}
++
++function Piwik_calculateLastActivityTime($datetime)
++{
++	return Piwik::getPrettyTimeFromSeconds(time() - strtotime($datetime));
++}
+\ No newline at end of file
+Index: plugins/ThoughtFarmer/Controller.php
+===================================================================
+--- plugins/ThoughtFarmer/Controller.php	(revision 0)
++++ plugins/ThoughtFarmer/Controller.php	(working copy)
+@@ -0,0 +1,238 @@
++<?php
++/**
++ * Piwik - Open source web analytics
++ *
++ * @link http://piwik.org
++ * @license http://www.gnu.org/licenses/gpl-3.0.html Gpl v3 or later
++ * @version $Id$
++ *
++ * @category Piwik_Plugins
++ * @package Piwik_ThoughtFarmer
++ */
++
++class Piwik_ThoughtFarmer_Controller extends Piwik_Controller
++{
++	const ACTIONS_REPORT_ROWS_DISPLAY = 100;
++
++	/*
++	 * These should be included as constants in lang/*.php files
++	 */
++	protected function initColumnTranslations($view)
++	{
++		$view->setColumnTranslation('nb_searches', 'Searches');
++		$view->setColumnTranslation('nb_users', 'Users');
++		$view->setColumnTranslation('nb_page_create', 'Creates');
++		$view->setColumnTranslation('nb_page_edit', 'Edits');
++		$view->setColumnTranslation('nb_page_comment', 'Comments');
++		$view->setColumnTranslation('nb_hits', 'Views');
++		$view->setColumnTranslation('nb_hits_per_visit', 'Views/Visit');
++	}
++
++	protected function configureUserActivityView($view)
++	{
++		$this->initColumnTranslations($view);
++		$view->disableExcludeLowPopulation();
++		$view->disableShowAllColumns();
++		$view->setLimit( 10 );
++	}
++
++	/*
++	 * shows Top Users widget
++	 */
++	public function getUserActivity($fetch = false)
++	{
++		if(Piwik_Common::getRequestVar('viewDataTable', '') == 'tableAllColumns')
++		{
++			$view = Piwik_ViewDataTable::factory('table', true);
++		}
++		else 
++		{
++			$view = Piwik_ViewDataTable::factory();
++		}
++		
++		$view->init(  	$this->pluginName,
++						__FUNCTION__,
++						'ThoughtFarmer.getUserActivity',
++						'getUserActivitySubtable'
++				);
++		
++		$view->setColumnsToDisplay( array('label','nb_visits','nb_hits','nb_searches','nb_page_edit','nb_page_comment'));
++		$view->setTableAllColumnsToDisplay( array('label','nb_visits','nb_hits','nb_searches','nb_page_edit','nb_page_comment'));
++		
++		$view->setSortedColumn( 'nb_hits' );
++		
++		$view->setColumnTranslation('label', 'Username');
++
++		$this->configureUserActivityView($view);
++
++		return $this->renderView($view, $fetch);
++	}
++
++	public function getUserActivitySubtable($fetch = false)
++	{
++		if(Piwik_Common::getRequestVar('viewDataTable', '') == 'tableAllColumns')
++		{
++			$view = Piwik_ViewDataTable::factory('table', true);
++		}
++		else 
++		{
++			$view = Piwik_ViewDataTable::factory();
++		}
++		
++		$view->init(  	$this->pluginName,
++						__FUNCTION__,
++						'ThoughtFarmer.getUserActivity',
++						'getUserActivitySubtable'
++				);
++
++		$view->setColumnsToDisplay( array('label', 'nb_page_edit', 'nb_page_comment' ) );
++		$view->setTableAllColumnsToDisplay( array('label','nb_page_edit','nb_page_comment'));
++		
++		$this->configureUserActivityView($view);
++
++		$view->setColumnTranslation('label', 'Page');
++
++		$view->disableSearchBox();
++
++		return $this->renderView($view, $fetch);
++	}
++
++	public function getSearches($fetch = false)
++	{
++		$view = Piwik_ViewDataTable::factory();
++		$view->init(  	$this->pluginName,
++						__FUNCTION__,
++						'ThoughtFarmer.getSearches',
++						'getSearchesSubtable'
++				);
++
++		$view->setColumnsToDisplay( array('label', 'nb_searches','nb_users', 'nb_visits' ) );
++		$view->setSortedColumn( 'nb_searches' );
++
++		$this->initColumnTranslations($view);
++		$view->disableExcludeLowPopulation();
++		$view->setLimit( 10 );
++
++		$view->setColumnTranslation('label', 'Keyword');
++
++		$view->disableExcludeLowPopulation();
++		$view->disableShowAllColumns();
++
++		return $this->renderView($view, $fetch);
++	}
++
++	public function getSearchesSubtable($fetch = false)
++	{
++		$view = Piwik_ViewDataTable::factory();
++		$view->init(  	$this->pluginName,
++						__FUNCTION__,
++						'ThoughtFarmer.getSearches',
++						'getSearchesSubtable'
++				);
++
++		$view->setColumnsToDisplay( array('label', 'nb_searches' ) );
++
++		$this->initColumnTranslations($view);
++		$view->disableExcludeLowPopulation();
++		$view->setLimit( 10 );
++		
++		$view->setColumnTranslation('label', 'Username');
++
++		$view->disableExcludeLowPopulation();
++		$view->disableShowAllColumns();
++		$view->disableSearchBox();
++
++		return $this->renderView($view, $fetch);
++	}
++
++	protected function configureViewActions($view)
++	{
++		$view->setColumnTranslation('nb_hits', Piwik_Translate('General_ColumnPageviews'));
++		$view->setColumnTranslation('nb_visits', Piwik_Translate('General_ColumnUniquePageviews'));
++		$view->setColumnTranslation('nb_page_edit', 'Edits');
++		$view->setColumnTranslation('nb_page_comment', 'Comments');
++
++        $view->setColumnsToDisplay( array('label','nb_hits','nb_visits','nb_page_edit','nb_page_comment') );
++		
++		$view->setTemplate('CoreHome/templates/datatable_actions.tpl');
++		
++		if(Piwik_Common::getRequestVar('idSubtable', -1) != -1)
++		{
++			$view->setTemplate('CoreHome/templates/datatable_actions_subdatable.tpl');
++		}
++		$view->disableExcludeLowPopulation();
++		$view->disableShowAllViewsIcons();
++		$view->disableShowAllColumns();
++		$view->disableSearchBox();
++
++		$view->setLimit( self::ACTIONS_REPORT_ROWS_DISPLAY );
++		$view->main();
++
++		return $view;
++	}
++
++	protected function getActionView($currentAction, $controllerActionSubtable, $apiCall)
++	{
++		$view = Piwik_ViewDataTable::factory();
++		$view->init(  	$this->pluginName,
++						$currentAction,
++						$apiCall,
++						$controllerActionSubtable );
++
++		$view->setColumnTranslation('label', 'Location');
++
++		return $view;
++	}
++
++	public function getPageHierarchy($fetch = false)
++	{
++		$view = $this->getActionView(__FUNCTION__, 'getPageHierarchySubDataTable', 'ThoughtFarmer.getPageHierarchy');
++		$this->configureViewActions($view);
++		return $this->renderView($view, $fetch);
++	}
++
++	public function getPageHierarchySubDataTable($fetch = false)
++	{
++		$view = $this->getActionView(__FUNCTION__, 'getPageHierarchySubDataTable', 'ThoughtFarmer.getPageHierarchy');
++		$this->configureViewActions($view);
++		return $this->renderView($view, $fetch);
++	}
++
++	public function getPageTitle($fetch = false)
++	{
++		$view = $this->getActionView(__FUNCTION__, 'getPageTitleSubDataTable', 'ThoughtFarmer.getPageTitle');
++		$this->configureViewActions($view);
++		return $this->renderView($view, $fetch);
++	}
++
++	public function getPageTitleSubDataTable($fetch = false)
++	{
++		$view = $this->getActionView(__FUNCTION__, 'getPageTitleSubDataTable', 'ThoughtFarmer.getPageTitle');
++		$this->configureViewActions($view);
++		return $this->renderView($view, $fetch);
++	}
++	
++	public function getUsersOnline($fetch = false)
++	{
++		$view = Piwik_ViewDataTable::factory();
++		$view->init(  	$this->pluginName,
++						__FUNCTION__,
++						'ThoughtFarmer.getUsersOnline');
++
++		$view->setColumnsToDisplay( array('label', 'total_time_spent', 'last_activity' ) );
++
++		$this->initColumnTranslations($view);
++		$view->disableExcludeLowPopulation();
++		$view->setLimit( 10 );
++		
++		$view->setColumnTranslation('label', 'Username');
++		$view->setColumnTranslation('total_time_spent', 'Total time spent');
++		$view->setColumnTranslation('last_activity', 'Last Activity');
++
++		$view->disableExcludeLowPopulation();
++		$view->disableShowAllColumns();
++
++		return $this->renderView($view, $fetch);
++	}
++}
++
+Index: plugins/ThoughtFarmer/ThoughtFarmer.php
+===================================================================
+--- plugins/ThoughtFarmer/ThoughtFarmer.php	(revision 0)
++++ plugins/ThoughtFarmer/ThoughtFarmer.php	(working copy)
+@@ -0,0 +1,592 @@
++<?php
++/**
++ * Piwik - Open source web analytics
++ *
++ * @link http://piwik.org
++ * @license http://www.gnu.org/licenses/gpl-3.0.html Gpl v3 or later
++ * @version $Id$
++ *
++ * @category Piwik_Plugins
++ * @package Piwik_ThoughtFarmer
++ */
++
++require_once 'ThoughtFarmerAction.php';
++
++class Piwik_ThoughtFarmer extends Piwik_Plugin
++{
++	protected $actionsTable = null;
++	protected static $limitLevelSubCategory = 10;
++	protected static $categoryDelimiter = '›';
++	protected static $defaultName = 'index';
++	
++	public function getInformation()
++	{
++		$info = array(
++			'name' => 'ThoughtFarmer',
++			'description' => 'Intranet features for Piwik',
++			'author' => 'Maciej Zawadzinski, Clearcode for ThoughtFarmer',
++			'author_homepage' => 'http://clearcode.cc/',
++			'version' => '0.1',
++			'TrackerPlugin' => true, // this plugin must be loaded during the stats logging
++		);
++
++		return $info;
++	}
++
++	public function getListHooksRegistered()
++	{
++		$hooks = array(
++			'ArchiveProcessing_Day.compute' => 'archiveDay',
++			'ArchiveProcessing_Period.compute' => 'archivePeriod',
++			'Tracker.saveVisitorInformation' => 'saveVisitorInformation',
++			'Tracker.knownVisitorUpdate' => 'saveVisitorInformation',
++			'Tracker.newAction' => 'getNewActionObject',
++			'Menu.add' => 'addMenus',
++			'WidgetsList.add' => 'addWidgets',
++		);
++		return $hooks;
++	}
++
++	function addWidgets()
++	{
++		Piwik_AddWidget( 'Actions_Actions', 'Top keywords', 'ThoughtFarmer', 'getSearches');
++		Piwik_AddWidget( 'General_Visitors', 'Top users', 'ThoughtFarmer', 'getUserActivity');
++		Piwik_AddWidget( 'Actions_Actions', 'Page Hierarchy', 'ThoughtFarmer','getPageHierarchy');
++		Piwik_AddWidget( 'Actions_Actions', 'Actions_SubmenuPageTitles', 'ThoughtFarmer','getPageTitle');
++		//Piwik_AddWidget( 'General_Visitors', 'Online users', 'ThoughtFarmer', 'getUsersOnline');
++	}
++
++	function addMenus()
++	{
++		Piwik_AddMenu( 'Actions_Actions', 'Top keywords', array('module' => 'ThoughtFarmer', 'action' => 'getSearches'));
++		Piwik_AddMenu( 'General_Visitors', 'Top users', array('module' => 'ThoughtFarmer', 'action' => 'getUserActivity'));
++		Piwik_AddMenu( 'Actions_Actions', 'Page Hierarchy', array('module' => 'ThoughtFarmer', 'action' => 'getPageHierarchy'),  true, 1);
++		Piwik_AddMenu( 'Actions_Actions', 'Actions_SubmenuPageTitles', array('module' => 'ThoughtFarmer', 'action' => 'getPageTitle'),  true, 4);
++		//Piwik_AddMenu( 'General_Visitors', 'Online users', array('module' => 'ThoughtFarmer', 'action' => 'getUsersOnline'));
++	}
++
++	/*
++	 * saves additional visitor information passed as custom data via piwik js
++	 */
++	public function saveVisitorInformation($notification)
++	{
++	    $visitorInfo =& $notification->getNotificationObject();
++
++		if( isset($_GET['data']) && ($customVariables = json_decode($_GET['data'],true)) !== null )
++		{
++			if( isset($customVariables['ThoughtFarmer_username']) )
++			{
++				printDebug("ThoughtFarmer::recording username");
++				
++				$visitorInfo['ThoughtFarmer_username'] = $customVariables['ThoughtFarmer_username'];
++			}
++		}
++	}
++
++	/*
++	 * change default Piwik action object to the one that detect & save searches
++	 */
++	public function getNewActionObject( $notification )
++	{
++	    $action =& $notification->getNotificationObject();
++
++	    $action = new Piwik_ThoughtFarmer_Action();
++	}
++
++	protected function archiveTopUsers( $archiveProcessing )
++	{
++		// archive top users
++		//
++		// (main) table columns: label (username), nb_visits, nb_searches, nb_page_edit, nb_page_comment, nb_page_create
++		// subtable columns: label (page name), nb_page_edit, nb_page_comment, nb_page_create (0 or 1 only, 1 means that user created it)
++
++
++		// first we generate data for main table
++
++		// get basic information about the user - number of visits, hits, searches
++
++		$query = "SELECT t1.label,
++			  t1.nb_visits,
++			  t1.nb_searches,
++			  t2.nb_hits
++			FROM
++			(
++			SELECT
++			    t1.thoughtfarmer_username as label,
++			    COUNT(DISTINCT t1.idvisit) as nb_visits,
++			    COUNT(DISTINCT t2.search_phrase) as nb_searches
++			FROM `".Piwik_Common::prefixTable('log_visit')."` as t1
++			LEFT JOIN `".Piwik_Common::prefixTable('thoughtfarmer_search')."` as t2
++			    ON t2.idvisit = t1.idvisit
++			WHERE t1.visit_last_action_time >= ?
++			            AND t1.visit_last_action_time <= ?
++			            AND t1.idsite = ?
++			            AND t1.thoughtfarmer_username is not null
++			GROUP BY t1.`thoughtfarmer_username`
++			) t1
++
++			INNER JOIN
++
++			(
++			SELECT
++			    t1.thoughtfarmer_username as label,
++			    COUNT(DISTINCT t3.idlink_va) as nb_hits
++			FROM `".Piwik_Common::prefixTable('log_visit')."` as t1
++			LEFT JOIN `".Piwik_Common::prefixTable('log_link_visit_action')."` as t3
++			    ON t3.idvisit = t1.idvisit
++			WHERE t1.visit_last_action_time >= ?
++			            AND t1.visit_last_action_time <= ?
++			            AND t1.idsite = ?
++			            AND t1.thoughtfarmer_username is not null
++			GROUP BY t1.`thoughtfarmer_username`
++			) t2
++
++			ON t1.label = t2.label
++			ORDER BY t1.nb_visits DESC;";
++
++		$results = Zend_Registry::get('db')->fetchAll($query,
++			array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite,
++				   $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite )
++			);
++
++		// get page creates, edits and comments
++		$query = "SELECT t1.thoughtfarmer_username as username,
++							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_CREATE.",1,0)) as nb_page_create,
++							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_EDIT.",1,0)) as nb_page_edit,
++							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_COMMENT.",1,0)) as nb_page_comment
++					FROM ".$archiveProcessing->logTable." as t1
++						JOIN ".Piwik_Common::prefixTable("thoughtfarmer_action")." as t2 USING(idvisit)
++					WHERE visit_last_action_time >= ?
++						AND visit_last_action_time <= ?
++						AND t1.idsite = ?
++					GROUP BY t1.thoughtfarmer_username";
++
++		$pageResults = Zend_Registry::get('db')->fetchAll($query,
++			array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite)
++			);
++
++		$pageResultsByUsername = array();
++
++		foreach($pageResults as $row)
++		{
++			$pageResultsByUsername[$row['username']] = $row;
++		}
++
++		foreach($results as &$row)
++		{
++			$username = $row['label'];
++
++			if( isset($pageResultsByUsername[$username]) )
++			{
++				$row['nb_page_create'] = $pageResultsByUsername[$username]['nb_page_create'];
++				$row['nb_page_edit'] = $pageResultsByUsername[$username]['nb_page_edit'];
++				$row['nb_page_comment'] = $pageResultsByUsername[$username]['nb_page_comment'];
++			}
++			$row['nb_hits_per_visit'] = round($row['nb_hits'] / $row['nb_visits'],2);
++		}
++
++		// load data into DataTable
++		$dataTable = new Piwik_DataTable();
++		$dataTable->addRowsFromSimpleArray($results);
++
++
++		// now generate data for subtables
++		
++		$query = "SELECT 	t3.name as url,
++							t4.name as name,
++							t1.thoughtfarmer_username as username,
++							COUNT(DISTINCT t1.idvisit) as nb_visits,
++							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_CREATE.",1,0)) as nb_page_create,
++							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_EDIT.",1,0)) as nb_page_edit,
++							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_COMMENT.",1,0)) as nb_page_comment
++					FROM ".$archiveProcessing->logTable." as t1
++						JOIN ".Piwik_Common::prefixTable("thoughtfarmer_action")." as t2 USING(idvisit)
++						JOIN ".Piwik_Common::prefixTable("log_action")." as t4 ON (t2.idaction_thoughtfarmer = t4.idaction)
++						JOIN ".Piwik_Common::prefixTable("log_action")." as t3 ON (t2.idaction_url = t3.idaction)
++					WHERE visit_last_action_time >= ?
++						AND visit_last_action_time <= ?
++						AND t1.idsite = ?
++					GROUP BY t4.idaction, t1.thoughtfarmer_username";
++
++
++		$results = Zend_Registry::get('db')->fetchAll($query,
++			array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite)
++		);
++
++		$pagesByUsername = array();
++
++		foreach($results as $row)
++		{
++			$username = $row['username'];
++
++			if( !isset($pagesByUsername[$username]) )
++			{
++				$pagesByUsername[$username] = new Piwik_DataTable();
++			}
++
++			$r = new Piwik_DataTable_Row();
++			$r->addColumn('label', $row['name']);
++			$r->addMetadata('url', $row['url']);
++			$r->addColumn('nb_visits', $row['nb_visits']);
++			$r->addColumn('nb_page_edit', $row['nb_page_edit']);
++			$r->addColumn('nb_page_comment', $row['nb_page_comment']);
++			$r->addColumn('nb_page_create', $row['nb_page_create']);
++
++			$pagesByUsername[$username]->addRow($r);
++		}
++
++		foreach($dataTable->getRows() as $row)
++		{
++			$username = $row->getColumn('label');
++
++			if( isset($pagesByUsername[$username]) )
++			{
++				$row->addSubtable($pagesByUsername[$username]);
++			}
++		}
++
++		// save to the database & free the memory used
++		$s = $dataTable->getSerialized();
++		$archiveProcessing->insertBlobRecord('thoughtfarmer_user', $s);
++		destroy($dataTable);
++	}
++
++	protected function archiveTopKeywords($archiveProcessing)
++	{
++
++		// archive top keywords
++		//
++		// (main) table columns: label (search keyword), nb_visits, nb_users, nb_searches
++		// subtable columns: label (username), nb_visits, nb_searches
++
++		// first we generate data for main table
++
++		$query = "SELECT
++				t2.search_phrase as label,
++				COUNT(DISTINCT idvisit) as nb_visits,
++				COUNT(DISTINCT t1.thoughtfarmer_username) as nb_users,
++				COUNT(t2.search_phrase) as nb_searches
++			    FROM `".Piwik_Common::prefixTable('log_visit')."` as t1
++					JOIN `".Piwik_Common::prefixTable('thoughtfarmer_search')."` as t2 USING(idvisit)
++			    WHERE visit_last_action_time >= ?
++					AND visit_last_action_time <= ?
++				 	AND t1.idsite = ?
++			    GROUP BY t2.`search_phrase` ORDER BY nb_searches DESC";
++
++
++		$results = Zend_Registry::get('db')->fetchAll($query,
++			array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite)
++			);
++		
++		// load data into DataTable
++		$dataTable = new Piwik_DataTable();
++		$dataTable->addRowsFromSimpleArray($results);
++
++
++		// now generate data for subtables
++
++		$query = "SELECT
++				t2.search_phrase as search_phrase,
++				t1.thoughtfarmer_username as username,
++				COUNT(t2.search_phrase) as nb_searches
++			    FROM `".Piwik_Common::prefixTable('log_visit')."` as t1
++					JOIN `".Piwik_Common::prefixTable('thoughtfarmer_search')."` as t2 USING(idvisit)
++			    WHERE visit_last_action_time >= ?
++					AND visit_last_action_time <= ?
++				 	AND t1.idsite = ?
++			    GROUP BY t2.`search_phrase`, t1.thoughtfarmer_username";
++
++		$results = Zend_Registry::get('db')->fetchAll($query,
++			array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite)
++		);
++
++		$usersBySearchPhrase = array();
++
++		foreach($results as $row)
++		{
++			$searchPhrase = $row['search_phrase'];
++
++			if( !isset($usersBySearchPhrase[$searchPhrase]) )
++			{
++				$usersBySearchPhrase[$searchPhrase] = new Piwik_DataTable();
++			}
++
++			$r = new Piwik_DataTable_Row();
++			$r->addColumn('label', $row['username']);
++			$r->addColumn('nb_searches', $row['nb_searches']);
++
++			$usersBySearchPhrase[$searchPhrase]->addRow($r);
++		}
++
++		foreach($dataTable->getRows() as $row)
++		{
++			$searchPhrase = $row->getColumn('label');
++
++			if( isset($usersBySearchPhrase[$searchPhrase]) )
++			{
++				$row->addSubtable($usersBySearchPhrase[$searchPhrase]);
++			}
++		}
++		
++		// save to the database & free the memory used
++		$s = $dataTable->getSerialized();
++		$archiveProcessing->insertBlobRecord('thoughtfarmer_search', $s);
++		destroy($dataTable);
++	}
++
++	protected function archiveActions($archiveProcessing)
++	{
++		// archive actions for Page Hierarchy view
++		
++		$this->actionsTable = array();
++
++		// basic metrics first: name, url, visits, hits
++		$query = "SELECT 	t3.name as url,
++							t4.name as name,
++							count(distinct t1.idvisit) as nb_visits,
++							count(distinct t1.idvisitor) as nb_uniq_visitors,
++							count(*) as nb_hits
++					FROM (".$archiveProcessing->logTable." as t1
++						LEFT JOIN ".Piwik_Common::prefixTable("log_link_visit_action")." as t2 USING (idvisit))
++							LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t3 ON (t2.idaction_url = t3.idaction)
++								LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t4 ON (t2.idaction_thoughtfarmer = t4.idaction)
++					WHERE visit_last_action_time >= ?
++						AND visit_last_action_time <= ?
++						AND t1.idsite = ?
++					GROUP BY t4.idaction
++					ORDER BY nb_hits DESC";
++
++		$query = $archiveProcessing->db->query($query, array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite ));
++		$this->updateActionsTableWithRowQuery($query);
++
++		// get page creates, edits and comments
++		$query = "SELECT 	t3.name as url,
++							t4.name as name,
++							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_EDIT.",1,0)) as nb_page_edit,
++							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_COMMENT.",1,0)) as nb_page_comment
++					FROM (".$archiveProcessing->logTable." as t1
++						LEFT JOIN ".Piwik_Common::prefixTable("thoughtfarmer_action")." as t2 USING (idvisit))
++							LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t3 ON (t2.idaction_url = t3.idaction)
++								LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t4 ON (t2.idaction_thoughtfarmer = t4.idaction)
++					WHERE visit_last_action_time >= ?
++						AND visit_last_action_time <= ?
++						AND t1.idsite = ?
++					GROUP BY t4.idaction";
++
++		$query = $archiveProcessing->db->query($query, array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite ));
++		$this->updateActionsTableWithRowQuery($query);
++
++		$dataTable = Piwik_ArchiveProcessing_Day::generateDataTable($this->actionsTable);
++		//$this->deleteInvalidSummedColumnsFromDataTable($dataTable);
++		$s = $dataTable->getSerialized();
++		$archiveProcessing->insertBlobRecord('thoughtfarmer_page_hierarchy', $s);
++		destroy($dataTable);
++
++		
++		// archive actions for Page Title view
++		
++		$this->actionsTable = array();
++
++		// basic metrics first: name, url, visits, hits
++		$query = "SELECT 	t3.name as url,
++							t4.name as name,
++							count(distinct t1.idvisit) as nb_visits,
++							count(distinct t1.idvisitor) as nb_uniq_visitors,
++							count(*) as nb_hits
++					FROM (".$archiveProcessing->logTable." as t1
++						LEFT JOIN ".Piwik_Common::prefixTable("log_link_visit_action")." as t2 USING (idvisit))
++							LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t3 ON (t2.idaction_url = t3.idaction)
++								LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t4 ON (t2.idaction_name = t4.idaction)
++					WHERE visit_last_action_time >= ?
++						AND visit_last_action_time <= ?
++						AND t1.idsite = ?
++					GROUP BY t4.idaction
++					ORDER BY nb_hits DESC";
++
++		$query = $archiveProcessing->db->query($query, array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite ));
++		$this->updateActionsTableWithRowQuery($query);
++
++		// get page creates, edits and comments
++		$query = "SELECT 	t3.name as url,
++							t4.name as name,
++							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_EDIT.",1,0)) as nb_page_edit,
++							sum(IF(t2.type=".Piwik_ThoughtFarmer_Action::THOUGHTFARMER_PAGE_COMMENT.",1,0)) as nb_page_comment
++					FROM (".$archiveProcessing->logTable." as t1
++						LEFT JOIN ".Piwik_Common::prefixTable("thoughtfarmer_action")." as t2 USING (idvisit))
++							LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t3 ON (t2.idaction_url = t3.idaction)
++								LEFT JOIN ".Piwik_Common::prefixTable("log_action")." as t4 ON (t2.idaction_name = t4.idaction)
++					WHERE visit_last_action_time >= ?
++						AND visit_last_action_time <= ?
++						AND t1.idsite = ?
++					GROUP BY t4.idaction";
++
++		$query = $archiveProcessing->db->query($query, array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite ));
++		$this->updateActionsTableWithRowQuery($query);
++
++		$dataTable = Piwik_ArchiveProcessing_Day::generateDataTable($this->actionsTable);
++		//$this->deleteInvalidSummedColumnsFromDataTable($dataTable);
++		$s = $dataTable->getSerialized();
++		$archiveProcessing->insertBlobRecord('thoughtfarmer_page_title', $s);
++		destroy($dataTable);
++	}
++
++	/*
++	 * archive for day period
++	 */
++	function archiveDay( $notification )
++	{
++		$archiveProcessing = $notification->getNotificationObject();
++
++		$this->archiveTopUsers($archiveProcessing);
++		$this->archiveTopKeywords($archiveProcessing);
++		$this->archiveActions($archiveProcessing);
++	}
++
++	/*
++	 * archive for week / month / year periods
++	 */
++	function archivePeriod( $notification )
++	{
++		$archiveProcessing = $notification->getNotificationObject();
++		$archiveProcessing->archiveDataTable(array('thoughtfarmer_page_hierarchy'));		
++		$archiveProcessing->archiveDataTable(array('thoughtfarmer_page_title'), null, 500, null, 'nb_hits');
++		$archiveProcessing->archiveDataTable(array('thoughtfarmer_user'));		
++		$archiveProcessing->archiveDataTable(array('thoughtfarmer_search'), null, 200, null, 'nb_searches');
++	}
++
++	static public function recordSearch($idvisit, $searchPhrase)
++	{
++	    $insertQuery = "INSERT INTO `".Piwik_Common::prefixTable('thoughtfarmer_search')."` ".
++	    " (`idvisit`,`search_phrase`) VALUES(?,?)";
++
++	    $params = array( $idvisit, $searchPhrase );
++		
++	    Piwik_Tracker::getDatabase()->query($insertQuery, $params);
++	}
++
++	/*
++	 * Explodes action name into an array of elements.
++	 */
++	protected function getActionExplodedNames($name)
++	{
++		$name = str_replace("\n", "", $name);
++		$split = explode(self::$categoryDelimiter, $name, self::$limitLevelSubCategory);
++
++		// trim every category and remove empty categories
++		$split = array_map('trim', $split);
++		$split = array_filter($split, 'strlen');
++
++		if( empty($split) )
++		{
++			return false; //array( trim(self::$defaultName) );
++		}
++
++		return array_values( $split );
++	}
++
++	protected function updateActionsTableWithRowQuery($query)
++	{		
++		while( $row = $query->fetch() )
++		{
++			$actionExplodedNames = $this->getActionExplodedNames($row['name']);
++
++			// we skip action that do not have name set
++			if( $actionExplodedNames === false )
++			{
++				continue;
++			}
++			
++			// we work on the root table of the given TYPE (either ACTION_URL or DOWNLOAD or OUTLINK etc.)
++			$currentTable =& $this->actionsTable;
++
++			// go to the level of the subcategory
++			$end = count($actionExplodedNames)-1;
++			for($level = 0 ; $level < $end; $level++)
++			{
++				$actionCategory = $actionExplodedNames[$level];
++				$currentTable =& $currentTable[$actionCategory];
++			}
++			$actionName = $actionExplodedNames[$end];
++
++			// we need to prefix the page
++			// so that if a page has the same name as a category
++			$actionName = ' ' . $actionName;
++
++			$currentTable =& $currentTable[$actionName];
++
++			// add the row to the matching sub category subtable
++			if(!($currentTable instanceof Piwik_DataTable_Row))
++			{
++
++				$currentTable = new Piwik_DataTable_Row(array(
++							Piwik_DataTable_Row::COLUMNS => array('label' => (string)$actionName),
++							Piwik_DataTable_Row::METADATA => array('url' => (string)$row['url']),
++						));
++			}
++
++			foreach($row as $name => $value)
++			{
++
++				if($name != 'name' && $name != 'url')
++				{
++					if(($alreadyValue = $currentTable->getColumn($name)) !== false)
++					{
++						$currentTable->setColumn($name, $alreadyValue+$value);
++					}
++					else
++					{
++						$currentTable->addColumn($name, $value);
++					}
++				}
++			}
++		}
++		// just to make sure php copies the last $currentTable in the $parentTable array
++		$currentTable =& $this->actionsTable;
++	}
++
++	public function install()
++	{
++		// add column to save username
++		$queryAddUsername = "ALTER TABLE `".Piwik_Common::prefixTable('log_visit')."`
++		    ADD COLUMN `thoughtfarmer_username` VARCHAR(255) DEFAULT NULL";
++
++		$queryAddIdactionThoughtFarmer = "ALTER TABLE `".Piwik_Common::prefixTable('log_link_visit_action')."`
++		    ADD COLUMN `idaction_thoughtfarmer`  int(10) unsigned DEFAULT NULL AFTER `idaction_name`";
++
++		$queryCreateThoughtFarmerAction = "CREATE TABLE `".Piwik_Common::prefixTable('thoughtfarmer_action')."` (
++				`idvisit` int(10) unsigned NOT NULL,
++				`idaction_url` int(10) unsigned NOT NULL,
++				`idaction_name` int(10) unsigned DEFAULT NULL,
++				`idaction_thoughtfarmer` int(10) unsigned DEFAULT NULL,
++				`type` int(10) unsigned NOT NULL,
++				KEY index_idvisit_type (`idvisit`,`type`)
++			);";
++
++		$queryCreateThoughtFarmerSearch = "CREATE TABLE `".Piwik_Common::prefixTable('thoughtfarmer_search')."` (
++				`idvisit` int(10) unsigned NOT NULL,
++				`search_phrase` VARCHAR(64),
++				KEY index_idvisit_search (`idvisit`, `search_phrase`)
++			);";
++
++		try {
++			Piwik_Exec($queryAddUsername);
++		}
++		catch(Exception $e){}
++
++		try {
++			Piwik_Exec($queryAddIdactionThoughtFarmer);
++		}
++		catch(Exception $e){}
++
++		try {
++			Piwik_Exec($queryCreateThoughtFarmerSearch);
++		}
++		catch(Exception $e){}
++		
++		try {
++			Piwik_Exec($queryCreateThoughtFarmerAction);
++		}
++		catch(Exception $e){}		
++
++	}
++}
+Index: plugins/ThoughtFarmer/ThoughtFarmerAction.php
+===================================================================
+--- plugins/ThoughtFarmer/ThoughtFarmerAction.php	(revision 0)
++++ plugins/ThoughtFarmer/ThoughtFarmerAction.php	(working copy)
+@@ -0,0 +1,244 @@
++<?php
++/**
++ * Piwik - Open source web analytics
++ *
++ * @link http://piwik.org
++ * @license http://www.gnu.org/licenses/gpl-3.0.html Gpl v3 or later
++ * @version $Id$
++ *
++ * @category Piwik_Plugins
++ * @package Piwik_ThoughtFarmer
++ */
++
++class Piwik_ThoughtFarmer_Action extends Piwik_Tracker_Action
++{
++	protected $idThoughtFarmerAction = null;
++	protected $thoughtFarmerActionName = null;
++
++	// ThoughtFarmer actions
++	const THOUGHTFARMER_PAGE_CREATE = 1;
++	const THOUGHTFARMER_PAGE_EDIT = 2;
++	const THOUGHTFARMER_PAGE_COMMENT = 3;
++
++	// Action type used to store structure action names in piwik_log_action
++	const TYPE_ACTION_THOUGHTFARMER = 10;
++
++	public function getThoughtFarmerActionName()
++	{
++		return $this->thoughtFarmerActionName;
++	}
++
++	public function getIdThoughtFarmerAction()
++	{
++		return $this->idThoughtFarmerAction;
++	}
++
++	// rewrite action name in order to use site's main_url
++	protected function rewriteActionName()
++	{
++		$websiteData = Piwik_Common::getCacheWebsiteAttributes($this->getIdSite());
++
++		if(isset($websiteData['hosts']))
++		{
++			$hosts = $websiteData['hosts'];
++			$mainUrl = array_shift($hosts);
++
++			$actionUrl = $this->getActionUrl();
++
++			$actionUrlParsed = @parse_url(Piwik_Common::unsanitizeInputValue($actionUrl));
++
++			if(!isset($actionUrlParsed['host']))
++			{
++				return false;
++			}
++
++
++			if( in_array($actionUrlParsed['host'], $hosts) )
++			{
++				$newActionUrl = str_replace("://".$actionUrlParsed['host'], "://".$mainUrl, $actionUrl);
++				$this->setActionUrl($newActionUrl);
++
++				printDebug("Rewriting ".$actionUrlParsed['host']." to ".$mainUrl);
++				
++				return true;
++			}
++		}
++		return false;
++	}
++	
++	public function loadIdActionNameAndUrl()
++	{
++		$this->rewriteActionName();
++		
++		parent::loadIdActionNameAndUrl();
++
++		if( !is_null($this->idThoughtFarmerAction) || is_null($this->getThoughtFarmerActionName()) )
++		{
++			return;
++		}
++		
++		$idAction = Piwik_Tracker::getDatabase()->fetchOne("SELECT idaction
++						    FROM ".Piwik_Common::prefixTable('log_action')
++						."  WHERE hash = CRC32(?) AND name = ? AND type = ? ",
++						array($this->getThoughtFarmerActionName(), $this->getThoughtFarmerActionName(),
++							self::TYPE_ACTION_THOUGHTFARMER));
++
++		if( $idAction !== false )
++		{
++			$this->idThoughtFarmerAction = $idAction;
++		}
++		else
++		{
++			$sql = "INSERT INTO ". Piwik_Common::prefixTable('log_action').
++							"( name, hash, type ) VALUES (?,CRC32(?),?)";
++
++			Piwik_Tracker::getDatabase()->query($sql,
++				array($this->getThoughtFarmerActionName(), $this->getThoughtFarmerActionName(),
++					self::TYPE_ACTION_THOUGHTFARMER));
++			
++			$this->idThoughtFarmerAction = Piwik_Tracker::getDatabase()->lastInsertId();
++		}
++	}
++
++
++
++	protected function recordAction( $idVisit, $visitorIdCookie, $idRefererActionUrl, $idRefererActionName, $timeSpentRefererAction )
++	{
++		$this->loadIdActionNameAndUrl();
++
++		$idActionName = $this->getIdActionName();
++		if(is_null($idActionName))
++		{
++			$idActionName = 0;
++		}
++		
++		$idThoughtFarmer = $this->getIdThoughtFarmerAction();
++		if(is_null($idThoughtFarmer))
++		{
++			$idThoughtFarmer = 0;
++		}
++
++		Piwik_Tracker::getDatabase()->query("INSERT INTO ".Piwik_Common::prefixTable('log_link_visit_action')
++                                                ." (idvisit, idsite, idvisitor, server_time, idaction_url, idaction_name, idaction_url_ref, idaction_name_ref, idaction_thoughtfarmer, time_spent_ref_action)
++                                                        VALUES (?,?,?,?,?,?,?,?,?,?)",
++						array(  $idVisit,
++                                                        $this->getIdSite(),
++                                                        $visitorIdCookie,
++                                                        Piwik_Tracker::getDatetimeFromTimestamp($this->timestamp),
++                                                        $this->getIdActionUrl(),
++                                                        $idActionName ,
++                                                        $idRefererActionUrl,
++                                                        $idRefererActionName,
++							$idThoughtFarmer,
++                                                        $timeSpentRefererAction
++                ));
++
++
++		$idLinkVisitAction = Piwik_Tracker::getDatabase()->lastInsertId();
++
++                $info = array(
++                        'idSite' => $this->getIdSite(),
++                        'idLinkVisitAction' => $this->idLinkVisitAction,
++                        'idVisit' => $idVisit,
++                        'idRefererActionUrl' => $idRefererActionUrl,
++                        'idRefererActionName' => $idRefererActionName,
++			'idThoughtFarmer' => $idThoughtFarmer,
++                        'timeSpentRefererAction' => $timeSpentRefererAction,
++                );
++                printDebug($info);
++
++
++		/*
++		* send the Action object ($this)  and the list of ids ($info) as arguments to the event
++		*/
++		Piwik_PostEvent('Tracker.Action.record', $this, $info);
++	 }
++
++	protected function recordThoughtFarmerAction($idVisit, $type)
++	{
++		$this->loadIdActionNameAndUrl();
++		
++		$idActionName = $this->getIdActionName();
++		$idActionUrl = $this->getIdActionUrl();
++		
++		if(is_null($idActionName))
++		{
++			$idActionName = 0;
++		}
++
++		$idThoughtFarmer = $this->getIdThoughtFarmerAction();
++		if(is_null($idThoughtFarmer))
++		{
++			$idThoughtFarmer = 0;
++		}
++
++		printDebug("ThoughtFarmer::recording thoughtfarmer action type=$type");
++
++		Piwik_Tracker::getDatabase()->query("INSERT INTO ".Piwik_Common::prefixTable('thoughtfarmer_action')
++					." (idvisit, idaction_url, idaction_name, idaction_thoughtfarmer, type)
++						VALUES (?,?,?,?,?)",
++				array($idVisit, $idActionUrl, $idActionName, $idThoughtFarmer, $type)
++		);
++	}
++	
++	public function record($idVisit, $visitorIdCookie, $idRefererActionUrl, $idRefererActionName, $timeSpentRefererAction)
++	{
++		// should we record "standard" piwik action
++		$recordAction = true;
++
++		// check if there are custom Piwik var passed
++		if( isset($_GET['data']) && ($customVariables = json_decode($_GET['data'],true)) !== null )
++		{
++			if( isset($customVariables['ThoughtFarmer_action']) )
++			{
++				$this->thoughtFarmerActionName = $customVariables['ThoughtFarmer_action'];
++
++				printDebug("ThoughtFarmer::detected thoughtfarmer action");
++			}
++
++			if( isset($customVariables['ThoughtFarmer_search']) )
++			{
++				$searchPhrase = strtolower(urldecode($customVariables['ThoughtFarmer_search']));
++
++				printDebug("ThoughtFarmer::recording search");
++				
++				Piwik_ThoughtFarmer::recordSearch($idVisit, $searchPhrase);
++
++				$recordAction = false;
++			}
++
++			if( isset($customVariables['ThoughtFarmer_page_create']) )
++			{
++				printDebug("ThoughtFarmer::recording page edit in action");
++
++				$this->recordThoughtFarmerAction($idVisit, self::THOUGHTFARMER_PAGE_CREATE);
++
++				$recordAction = false;
++			}
++
++			if( isset($customVariables['ThoughtFarmer_page_edit']) )
++			{
++				printDebug("ThoughtFarmer::recording page edit in action");
++
++				$this->recordThoughtFarmerAction($idVisit, self::THOUGHTFARMER_PAGE_EDIT);
++				
++				$recordAction = false;
++			}
++
++			if( isset($customVariables['ThoughtFarmer_page_comment']) )
++			{
++				printDebug("ThoughtFarmer::recording page comment in action");
++
++				$this->recordThoughtFarmerAction($idVisit, self::THOUGHTFARMER_PAGE_COMMENT);
++
++				$recordAction = false;
++			}
++
++		}
++
++		if ($recordAction === true)
++		{
++			$this->recordAction($idVisit, $visitorIdCookie, $idRefererActionUrl, $idRefererActionName, $timeSpentRefererAction);
++		}
++	}
++}
+Index: plugins/ThoughtFarmerUser/API.php
+===================================================================
+--- plugins/ThoughtFarmerUser/API.php	(revision 0)
++++ plugins/ThoughtFarmerUser/API.php	(working copy)
+@@ -0,0 +1,57 @@
++<?php
++
++class Piwik_ThoughtFarmerUser_API
++{
++	static private $instance = null;
++
++	static public function getInstance()
++	{
++		if (self::$instance == null)
++		{
++			$c = __CLASS__;
++			self::$instance = new $c();
++		}
++		return self::$instance;
++	}
++
++	protected function getDataTable($name, $idSite, $period, $date, $expanded, $idSubtable = false, $summarize = false )
++	{
++		Piwik::checkUserHasViewAccess( $idSite );
++
++		$archive = Piwik_Archive::build($idSite, $period, $date );
++
++		if($idSubtable === false)
++		{
++			$idSubtable = null;
++		}
++
++		if($expanded)
++		{
++			$dataTable = $archive->getDataTableExpanded($name, $idSubtable);
++		}
++		else
++		{
++			$dataTable = $archive->getDataTable($name, $idSubtable);
++		}
++		$dataTable->filter('Sort', array(Piwik_Archive::INDEX_NB_VISITS, 'desc', $naturalSort = false, $expanded));
++
++		if( $summarize )
++		{
++		    $dataTable->queueFilter('AddSummaryRow',0);
++		}
++
++		$dataTable->queueFilter('ReplaceColumnNames', array($expanded));
++		$dataTable->queueFilter('ReplaceSummaryRowLabel');
++
++		return $dataTable;
++	}
++
++	public function getUserEngagement( $idSite, $period, $date, $expanded = false, $idSubtable = false )
++	{
++		Piwik::checkUserHasViewAccess($idSite);
++
++		$dataTable = $this->getDataTable('thoughtfarmer_engagement', $idSite, $period, $date, $expanded, $idSubtable );
++
++		return $dataTable;
++	}
++}
+\ No newline at end of file
+Index: plugins/ThoughtFarmerUser/Controller.php
+===================================================================
+--- plugins/ThoughtFarmerUser/Controller.php	(revision 0)
++++ plugins/ThoughtFarmerUser/Controller.php	(working copy)
+@@ -0,0 +1,28 @@
++<?php
++
++class Piwik_ThoughtFarmerUser_Controller extends Piwik_Controller
++{
++	public function getUserEngagement($fetch = false)
++	{
++		$view = Piwik_ViewDataTable::factory('graphPie');
++		$view->init(  	$this->pluginName,
++						__FUNCTION__,
++						'ThoughtFarmerUser.getUserEngagement',
++						'getUserEngagement'
++				);
++
++		$view->setColumnsToDisplay( array('label', 'nb_member') );
++
++		$view->setSortedColumn( 'label', 'asc' );
++
++		$view->setColumnTranslation('label', 'Visits');
++		$view->setColumnTranslation('nb_member', 'Members');
++
++		$view->disableOffsetInformationAndPaginationControls();
++		$view->disableExcludeLowPopulation();
++		$view->disableShowAllColumns();
++		$view->setLimit( 10 );
++		
++		return $this->renderView($view, $fetch);
++	}
++}
+Index: plugins/ThoughtFarmerUser/ThoughtFarmerUser.php
+===================================================================
+--- plugins/ThoughtFarmerUser/ThoughtFarmerUser.php	(revision 0)
++++ plugins/ThoughtFarmerUser/ThoughtFarmerUser.php	(working copy)
+@@ -0,0 +1,79 @@
++<?php
++
++
++class Piwik_ThoughtFarmerUser extends Piwik_Plugin
++{
++	protected $actionsTable = null;
++	protected static $limitLevelSubCategory = 10;
++	protected static $categoryDelimiter = '/';
++	protected static $defaultName = 'index';
++
++	public function getInformation()
++	{
++		$info = array(
++			'name' => 'ThoughtFarmer',
++			'description' => 'Intranet features for Piwik',
++			'author' => 'Maciej Zawadzinski, Clearcode for ThoughtFarmer',
++			'author_homepage' => 'http://clearcode.cc/',
++			'version' => '0.1',
++			'TrackerPlugin' => true, // this plugin must be loaded during the stats logging
++		);
++
++		return $info;
++	}
++
++	public function getListHooksRegistered()
++	{
++		$hooks = array(
++			'ArchiveProcessing_Day.compute' => 'archiveDay',
++			'ArchiveProcessing_Period.compute' => 'archivePeriod',
++			'Menu.add' => 'addMenus',
++			'WidgetsList.add' => 'addWidgets',
++		);
++		return $hooks;
++	}
++
++	function addWidgets()
++	{
++		Piwik_AddWidget( 'General_Visitors', 'User Engagement', 'ThoughtFarmerUser', 'getUserEngagement');
++	}
++
++	function addMenus()
++	{
++		Piwik_AddMenu( 'General_Visitors', 'User Engagement', array('module' => 'ThoughtFarmerUser', 'action' => 'getUserEngagement'));
++	}
++
++	function archiveDay($notification)
++	{
++		$archiveProcessing = $notification->getNotificationObject();
++
++		// archive top users
++		$query = "SELECT CONCAT(nb_visits, ' visit(s)') as label, COUNT(DISTINCT thoughtfarmer_username) as nb_member FROM
++				(SELECT thoughtfarmer_username, COUNT(*) as nb_visits
++					FROM `".Piwik_Common::prefixTable('log_visit')."` as t1
++					WHERE visit_last_action_time >= ?
++								AND visit_last_action_time <= ?
++								AND idsite = ?
++								AND t1.thoughtfarmer_username is not NULL
++					GROUP BY t1.thoughtfarmer_username) as t2 GROUP BY label";
++		
++		$results = Zend_Registry::get('db')->fetchAll($query,
++				array( $archiveProcessing->getStartDatetimeUTC(), $archiveProcessing->getEndDatetimeUTC(), $archiveProcessing->idsite)
++				);
++
++		$dataTable = new Piwik_DataTable();
++		$dataTable->addRowsFromSimpleArray($results);
++		$s = $dataTable->getSerialized();
++		$archiveProcessing->insertBlobRecord('thoughtfarmer_engagement', $s);
++		
++		destroy($dataTable);
++
++	}
++
++	function archivePeriod($notification)
++	{
++		$archiveProcessing = $notification->getNotificationObject();
++
++		$archiveProcessing->archiveDataTable(array('thoughtfarmer_engagement'));
++	}
++}
+\ No newline at end of file
+Index: themes/default/common.css
+===================================================================
+--- themes/default/common.css	(revision 7789)
++++ themes/default/common.css	(working copy)
+@@ -172,7 +172,7 @@
+ 	position: absolute;
+ 	right:4px;
+ 	overflow:hidden; 
+-	display:block; 
++	display:none; 
+ 	height:20px;
+ 	line-height:20px;
+ 	padding:5px 8px 5px 38px;
+@@ -223,6 +223,13 @@
+ 	height:40px;
+ }
+ 
++#logo a {
++ display: block;
++ background: url(../../themes/logo.png) no-repeat 0 0;
++ width: 315px;
++ height: 57px;
++}
++
+ /*sites_autocomplete*/
+ .sites_autocomplete{
+ 	position: absolute;
+Index: themes/default/simple_structure_header.tpl
+===================================================================
+--- themes/default/simple_structure_header.tpl	(revision 7789)
++++ themes/default/simple_structure_header.tpl	(working copy)
+@@ -9,4 +9,4 @@
+ </head>
+ <body id="simple">
+ <div id="contentsimple">
+-	<div id="title"><img title='Piwik' alt="Piwik" src='themes/default/images/logo-header.png' style='margin-left:10px' /><span id="subh1"> # <a href='http://piwik.org/'>Web Analytics</a></span></div>
++	<div id="title"><img title='Intranet Statistics' alt="Intranet Statistics" src='themes/default/images/logo-header.png' style='margin-left:10px' /><span id="subh1"> # <a href='http://www.intranetstatistics.com/'>Intranet Statistics</a></span></div>

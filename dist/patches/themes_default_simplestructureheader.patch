@@ -1,8 +1,0 @@
---- themes/default/simple_structure_header.tpl
-+++ themes/default/simple_structure_header.tpl
-@@ -9,4 +9,4 @@
- </head>
- <body>
- <div id="contentsimple">
--	<div id="title"><img title='Piwik' alt="Piwik" src='themes/default/images/logo-header.png' style='margin-left:10px' /><span id="subh1"> # <a href='http://piwik.org/'>web analytics</a></span></div>
-+	<div id="title"><span id="h1">Intranet Statistics</span></div>

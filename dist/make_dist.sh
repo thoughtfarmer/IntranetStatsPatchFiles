@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="1.6"
+VERSION="1.10.1"
 DISTNAME="intranetstatistics"
 
 WORKING_DIR=`dirname $0`
@@ -11,14 +11,8 @@ rm -rf $DISTNAME
 svn export "http://dev.piwik.org/svn/tags/$VERSION" $DISTNAME
 
 # copy files
-cp -R plugins/ThoughtFarmer $DISTNAME/plugins
-cp -R plugins/ThoughtFarmerUser $DISTNAME/plugins
 cp -R themes/logo.png $DISTNAME/themes/
-cp -R plugins/Login/templates/* $DISTNAME/plugins/Login/templates
-cp -R libs/jquery/* $DISTNAME/libs/jquery
-cp $DISTNAME/misc/cron/archive.sh $DISTNAME/misc/cron/archive-day.sh
-cp $DISTNAME/misc/cron/archive.sh $DISTNAME/misc/cron/archive-week-month-year.sh
-rm $DISTNAME/misc/cron/archive.sh
+cp -R themes/logo-header.png $DISTNAME/themes/
 mkdir $DISTNAME/tmp/tcpdf
 
 # apply patches
