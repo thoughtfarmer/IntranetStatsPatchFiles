@@ -823,7 +823,7 @@ Index: plugins/Login/templates/termsAndConditions.tpl
 +	$('#acceptButton').click(acceptTerms);
 +	$('#dontAcceptButton').click(dontAcceptTerms);	
 +	$('#termsLink').click(showTerms);		
-+	$('#loginform').submit(submitLoginForm);
++	$('#login_form').submit(submitLoginForm);
 +	
 +	// check cookie and check the terms accepted checkbox
 +	var accepted =	$.cookie("termsaccepted");
