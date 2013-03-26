@@ -8,15 +8,16 @@ cd $WORKING_DIR
 
 # get the Piwik
 rm -rf $DISTNAME
-svn export "http://dev.piwik.org/svn/tags/$VERSION" $DISTNAME
+git clone https://github.com/piwik/piwik.git $DISTNAME
+cd $DISTNAME
+git checkout $VERSION
 
 # copy files
-cp -R themes/logo.png $DISTNAME/themes/
-cp -R themes/logo-header.png $DISTNAME/themes/
-mkdir $DISTNAME/tmp/tcpdf
+cp -R ../themes/logo.png ./themes/
+cp -R ../themes/logo-header.png ./themes/
+mkdir ./tmp/tcpdf
 
 # apply patches
-cd $DISTNAME
 for P in `ls ../patches/*.patch`
 do
 	patch -p0 < $P
