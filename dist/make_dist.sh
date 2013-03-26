@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION="1.10.1"
+VERSION="1.11.1"
 DISTNAME="intranetstatistics"
 
 WORKING_DIR=`dirname $0`
